@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.370.0",
+    "@aws-sdk/credential-provider-node": "^3.370.0",
+    "aws-sdk": "^2.1421.0",
+    "fs": "^0.0.1-security",
+    "nodemailer": "^6.9.4"
+  }
+}

@@ -1,0 +1,148 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "gym buddy",
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "HelloWorldIntent",
+                    "slots": [],
+                    "samples": [
+                        "hello",
+                        "how are you",
+                        "say hi world",
+                        "say hi",
+                        "hi",
+                        "say hello world",
+                        "say hello"
+                    ]
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "BMIIntent",
+                    "slots": [
+                        {
+                            "name": "height",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{height}"
+                            ]
+                        },
+                        {
+                            "name": "weight",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{weight}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "{weight}",
+                        "{height}",
+                        "my height is {height} and weight is {weight}",
+                        "{height} {weight}"
+                    ]
+                },
+                {
+                    "name": "GoalIntent",
+                    "slots": [
+                        {
+                            "name": "goal",
+                            "type": "fitnessGoals"
+                        }
+                    ],
+                    "samples": [
+                        "{goal}",
+                        "my goal is to {goal}"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "fitnessGoals",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "weight loss"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "muscle gain"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "BMIIntent",
+                    "delegationStrategy": "ALWAYS",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "height",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1560171362266.412165027567"
+                            }
+                        },
+                        {
+                            "name": "weight",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1560171362266.1051761478767"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "delegationStrategy": "ALWAYS"
+        },
+        "prompts": [
+            {
+                "id": "Elicit.Slot.1560171362266.412165027567",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What's your height?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1560171362266.1051761478767",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What's your weight?"
+                    }
+                ]
+            }
+        ]
+    }
+}
