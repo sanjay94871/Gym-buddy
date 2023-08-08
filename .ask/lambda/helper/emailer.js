@@ -42,7 +42,7 @@ var emailer= async function (handlerInput,workoutData){
 await getEmail(handlerInput);
 function convertScheduleToHTML(workoutData) {
   let htmlTable = '<table border="1">';
-  htmlTable += '<tr><th>Day</th><th>Workout</th><th>Muscle</th><th>Sets</th><th>Reps</th></tr>';
+  htmlTable += '<tr><th>Day</th><th>Workout</th><th>Target</th><th>Sets&Reps/Time</th></tr>';
 
   for (const day in workoutData) {
     
@@ -53,7 +53,10 @@ function convertScheduleToHTML(workoutData) {
     else{
     htmlTable+=`<tr ><td rowspan='5'>${day}</td>`
     workouts.forEach((workout) => {
-      htmlTable += `<td>${workout.workout}</td><td>${workout.muscle}</td><td>${workout.sets}</td><td>${workout.reps}</td></tr><tr>`;
+      if(workout.muscle==="cardio")
+        htmlTable += `<td>${workout.workout}</td><td>${workout.muscle}</td><td>${workout.time} mins</td></tr><tr>`;
+      else
+        htmlTable += `<td>${workout.workout}</td><td>${workout.muscle}</td><td>${workout.sets} sets of ${workout.reps} reps</td></tr><tr>`;
     });
   }
   }

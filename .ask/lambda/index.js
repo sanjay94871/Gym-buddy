@@ -13,12 +13,15 @@ const skillUtils= require("./helper/skillUtils")
 var bmi,existingUser;
 var userInfo ={
   userId:'',
+  personId:'',
   name:'',
   age:'',
   gender:'',
   height:'',
   weight:'',
-  fitnessGoal:''
+  fitnessGoal:'',
+  bmi:'',
+  fitnessLevel:''
 }
 
 // Handler for the LaunchRequest
@@ -27,9 +30,12 @@ const LaunchRequestHandler = {
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
   },
   async handle(handlerInput) {
-    const userId = handlerInput.requestEnvelope.context.System.user.userId;;
+    const {user,person}=handlerInput.requestEnvelope.context.System
+    const userId = user.userId;
+    const personId=(person)?(person.personId):"null";
+    console.log(personId)
     
-    existingUser = await dbHelper.getUserFromDynamoDB(userId);
+    existingUser = await dbHelper.getUserFromDynamoDB(userId,personId);
     if(existingUser){
       const speechText =`<speak>Welcome Back ${existingUser.name}. How can I assist you. Choose an option from 1-4. 1. Update your profile,\n 2. Record a workout,\n 3. Get previous workout report,\n 4. Get workout schedule</speak>`;
       return handlerInput.responseBuilder
@@ -40,6 +46,7 @@ const LaunchRequestHandler = {
     else{
     const speechText = 'Welcome to the Gym Workout Planner. We will start by creating a profile for you. Please start by saying your name';
     userInfo.userId = userId
+    userInfo.personId=personId
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
@@ -97,15 +104,20 @@ const updateProfileIntentHandler= {
     var attribute= slots.attribute.value
 
    attribute=(attribute==='fitness goal')?('fitnessGoal'):attribute
+   attribute=(attribute==='fitness level')?('fitnessLevel'):attribute
 
    var fil= Object.fromEntries(Object.entries(slots).filter(([key, value]) => value.hasOwnProperty('value') && (key!=='attribute')));
    var change= Object.values(fil)[0].value
  
   existingUser[attribute]=change
 
+  if(attribute==="height" || attribute==="weight"){
+    existingUser['bmi']=skillUtils.calculateBMI(existingUser.height,existingUser.weight)
+  }
+
     dbHelper.regUser(existingUser);
    return handlerInput.responseBuilder
-      .speak(`Alright.Your ${attribute} has been updated to ${change} `)
+      .speak(`Alright. Your ${attribute} has been updated to ${change} `)
       .reprompt(`Alright. Your ${attribute} has been updated to ${change} `)
       .getResponse();
   }
@@ -243,6 +255,7 @@ const WorkoutDetailsIntentHandler={
   handle(handlerInput) {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
     const userId = handlerInput.requestEnvelope.context.System.user.userId;
+    
     var sets=handlerInput.requestEnvelope.request.intent.slots.sets.value
     var reps=handlerInput.requestEnvelope.request.intent.slots.reps.value
     let currentWorkout=sessionAttributes.currentWorkout;
@@ -283,11 +296,12 @@ const BMIIntentHandler = {
     var heightSlot = handlerInput.requestEnvelope.request.intent.slots.height.value;
     var weightSlot = handlerInput.requestEnvelope.request.intent.slots.weight.value;
 
-    userInfo.height=heightSlot;
-    userInfo.weight=weightSlot;
-
     // Calculate the BMI based on the provided height and weight
     bmi = skillUtils.calculateBMI(heightSlot,weightSlot);
+
+    userInfo.height=heightSlot;
+    userInfo.weight=weightSlot;
+    userInfo.bmi=bmi
 
     const speechText = `Great!Your BMI is ${bmi}. Please provide your fitness goal to get a personalized workout plan.`;
 
@@ -305,28 +319,92 @@ const GoalIntentHandler = {
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GoalIntent';
   },
   async handle(handlerInput) {
-    var userId= handlerInput.requestEnvelope.context.System.user.userId;
     var fitnessGoalSlot = handlerInput.requestEnvelope.request.intent.slots.goal.value;
     userInfo.fitnessGoal=fitnessGoalSlot;
-    dbHelper.regUser(userInfo);
-
-    let workoutPlan='';
-    return dbHelper.getWorkout()
-    .then((data)=>{
-        workoutPlan=workoutG(data,fitnessGoalSlot)
-        console.log(workoutPlan);
-        emailer(handlerInput,workoutPlan);
 
         
-    const speechText = `Your Profile has been created and your personalized workout plan has been mailed to you`;
+    const speechText = `Cool! How would rate your current fitness level as Beginner or Intermediate or Expert`;
    
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
-      .getResponse(); })
+      .getResponse(); 
       
   },
 };
+
+const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const d = new Date();
+let day = weekday[d.getDay()];
+let workoutPlan='';
+
+const FitnessLevelIntent ={
+  canHandle(handlerInput) {
+    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'FitnessLevelIntent';
+  },
+  async handle(handlerInput) {
+    var fitnessLevel = handlerInput.requestEnvelope.request.intent.slots.fitnessLevel.value;
+    userInfo.fitnessLevel=fitnessLevel
+    dbHelper.regUser(userInfo);
+
+    
+    return dbHelper.getWorkout()
+    .then((data)=>{
+        workoutPlan=workoutG(data,userInfo.fitnessGoal)
+        console.log(workoutPlan);
+        emailer(handlerInput,workoutPlan);
+        dbHelper.regWorkout(userInfo.userId,userInfo.personId, workoutPlan)
+
+        const speechText = `<speak>Based on your Fitness level and Fitness Goal, a personalized workout plan has been mailed to you. Today's ${day}, if you wanna start today's workout now, try saying "start the workout"</speak>`;
+        return handlerInput.responseBuilder
+        .speak(speechText)
+        .reprompt(speechText)
+        .getResponse(); })
+
+  }
+}
+
+const WorkoutIntentHandler={
+  canHandle(handlerInput) {
+    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'WorkoutIntent';
+  },
+  handle(handlerInput) {
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    var control = handlerInput.requestEnvelope.request.intent.slots.control.value;
+    var workout=workoutPlan[day]
+    var workoutCount= workout.length
+    if(control==="start"){
+      if(workout[0]['muscle']==="cardio")
+         var speechText=`start the workout with ${workout[0]['workout']} for ${workout[0]['time']} mins`
+      else
+        var speechText=`start the workout with ${workout[0]['workout']} doing ${workout[0]['sets']} of ${workout[0]['reps']}`
+      sessionAttributes.workoutno=1
+    }
+    else if(control==="next" && sessionAttributes.workoutno<workoutCount){
+      var i= sessionAttributes.workoutno;
+      if(workout[i]['muscle']==="cardio")
+        var speechText=`next workout is ${workout[i]['workout']} for ${workout[i]['time']} mins`
+      else
+        var speechText=`next workout is ${workout[i]['workout']} doing ${workout[i]['sets']} sets of ${workout[i]['reps']} reps`
+        sessionAttributes.workoutno=i+1
+
+    }
+    else{
+      var speechText="End of today's workout session"
+    }
+
+
+    return handlerInput.responseBuilder
+    .speak(speechText)
+    .reprompt(speechText)
+    .getResponse(); 
+
+  }
+
+
+}
 
 const HelpIntentHandler = {
     canHandle(handlerInput) {
@@ -447,8 +525,10 @@ exports.handler = Alexa.SkillBuilders.custom()
         GetGenderIntentHandler,
         recordWorkoutIntentHandler,
         WorkoutDetailsIntentHandler,
+        WorkoutIntentHandler,
         YesIntentHandler,
         GoalIntentHandler,
+        FitnessLevelIntent,
         CancelAndStopIntentHandler,
         FallbackIntentHandler,
         SessionEndedRequestHandler,

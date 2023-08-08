@@ -32,6 +32,27 @@ dbHelper.prototype.getWorkout = () => {
     });
 }
 
+dbHelper.prototype.regWorkout = (userId, personId, workoutplan) => {
+    return new Promise((resolve, reject) => {
+
+        const params= {
+            TableName:'schedule',
+            Item:{
+                userId:userId,
+                personId: personId,
+                workout: workoutplan
+            },
+        };
+
+        try {
+            docClient.put(params).promise();
+            console.log('Workout saved to DynamoDB:');
+        } catch (error) {
+            console.error('Error saving workout to DynamoDB:', error);
+        }
+    });
+}
+
 //Registering New User
 dbHelper.prototype.regUser = (userInfo) => {
     return new Promise((resolve, reject) => {
@@ -42,12 +63,15 @@ dbHelper.prototype.regUser = (userInfo) => {
             TableName: usertable,
             Item: {
                 userId: userInfo.userId,
+                personId:userInfo.personId,
                 name: userInfo.name,
                 age: userInfo.age,
                 gender: userInfo.gender,
                 height: userInfo.height,
                 weight: userInfo.weight,
                 fitnessGoal: userInfo.fitnessGoal,
+                bmi:userInfo.bmi,
+                fitnessLevel: userInfo.fitnessLevel,
                 createdAt: new Date().toISOString(),
             },
         };
@@ -62,17 +86,17 @@ dbHelper.prototype.regUser = (userInfo) => {
 }
 
 //Check the existing user and get data associated
-dbHelper.prototype.getUserFromDynamoDB=async (userId) =>{
+dbHelper.prototype.getUserFromDynamoDB=async (userId,personId) =>{
     try {
         const params = {
           TableName: usertable, // Replace with your DynamoDB table name
-          Key: { userId }
+          Key: {userId, personId}
         };
     
         const data = await docClient.get(params).promise();
         return data.Item;
       } catch (error) {
-        console.error('Error retrieving user data:', error);
+        console.log('Error retrieving user data:', error);
         return null;
       }
 

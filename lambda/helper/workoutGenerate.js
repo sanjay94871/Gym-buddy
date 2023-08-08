@@ -20,7 +20,7 @@ var workoutG = function (data,fitnessGoal) {
           counts.strengthcount--;
         }
         if (workout.type === 'cardio' && counts.cardiocount > 0 && days.muscle!='rest') {
-          workoutPlan[days.day].push({ 'workout': workout.name,'muscle':'cardio', 'sets': '3', 'reps': '12' });
+          workoutPlan[days.day].push({ 'workout': workout.name,'muscle':'cardio', 'time':20 });
           counts.cardiocount--;
         }
       }
