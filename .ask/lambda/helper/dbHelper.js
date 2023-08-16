@@ -32,6 +32,25 @@ dbHelper.prototype.getWorkout = () => {
     });
 }
 
+dbHelper.prototype.updateWorkoutdb = (workout) => {
+    return new Promise((resolve, reject) => {
+
+        const params= {
+            TableName:'workout',
+            Item:{
+                ...workout
+            },
+        };
+
+        try {
+            docClient.put(params).promise();
+            console.log('Workout saved to DynamoDB:');
+        } catch (error) {
+            console.error('Error saving workout to DynamoDB:', error);
+        }
+    });
+}
+
 dbHelper.prototype.regWorkout = (userId, personId, workoutplan) => {
     return new Promise((resolve, reject) => {
 
@@ -51,6 +70,22 @@ dbHelper.prototype.regWorkout = (userId, personId, workoutplan) => {
             console.error('Error saving workout to DynamoDB:', error);
         }
     });
+}
+
+dbHelper.prototype.getWorkoutSchedule=async (userId,personId) =>{
+    try {
+        const params = {
+          TableName: "schedule", // Replace with your DynamoDB table name
+          Key: {userId, personId}
+        };
+    
+        const data = await docClient.get(params).promise();
+        return data.Item;
+      } catch (error) {
+        console.log('Error retrieving user data:', error);
+        return null;
+      }
+
 }
 
 //Registering New User
@@ -103,12 +138,17 @@ dbHelper.prototype.getUserFromDynamoDB=async (userId,personId) =>{
 }
 
 
-dbHelper.prototype.storeWorkoutinDB = (userId,workoutdict) => {
+dbHelper.prototype.storeWorkoutinDB = (userId,personId,workoutdict) => {
     return new Promise((resolve, reject) => {
-    const params = {
+        var currentDate=new Date()
+        var options = { year: 'numeric', month: 'long', day: 'numeric' };
+        var dateString = currentDate.toLocaleDateString('en-US', options);
+    
+        const params = {
         TableName: 'WorkoutRecord',
         Item: {
             userId: userId,
+            personId:personId,
             createdOn: new Date().toISOString(),
             workouts:workoutdict
         },
@@ -116,11 +156,38 @@ dbHelper.prototype.storeWorkoutinDB = (userId,workoutdict) => {
 
     try {
         docClient.put(params).promise();
-        console.log('workouts saved to DynamoDB:', userId);
+        console.log('Recorded workouts saved to DynamoDB:', userId);
     } catch (error) {
         console.error('Error saving user ID to DynamoDB:', error);
     }
 });
 }
+
+dbHelper.prototype.getRecordedWorkouts = async (userId,personId) => {
+    return new Promise((resolve, reject) => {
+        const params = {
+            TableName: 'WorkoutRecord',
+            FilterExpression: '#userId = :userId AND #personId = :personId',
+            ExpressionAttributeNames: {
+                '#userId': 'userId', 
+                '#personId':'personId'
+            },
+            ExpressionAttributeValues: {
+                ':userId':userId,
+                ':personId':personId,
+            }
+        }
+        docClient.scan(params, (err, data) => {
+            if (err) {
+                console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+                return reject(JSON.stringify(err, null, 2))
+            } 
+            console.log("GetRecordedWorkout succeeded:", JSON.stringify(data, null, 2));
+            resolve(data.Items)
+            
+        })
+    });
+}
+
 
 module.exports = new dbHelper();

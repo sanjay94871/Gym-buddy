@@ -360,6 +360,9 @@
           "children": [
             {
               "pathElement": "configuration\\.(json|JSON)"
+            },
+            {
+              "pathElement": "notification_settings\\.(json|JSON)"
             }
           ]
         },
