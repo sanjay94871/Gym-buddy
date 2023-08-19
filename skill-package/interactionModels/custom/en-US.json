@@ -2,6 +2,11 @@
     "interactionModel": {
         "languageModel": {
             "invocationName": "gym buddy",
+            "modelConfiguration": {
+                "fallbackIntentSensitivity": {
+                    "level": "LOW"
+                }
+            },
             "intents": [
                 {
                     "name": "AMAZON.CancelIntent",
@@ -16,19 +21,6 @@
                     "samples": []
                 },
                 {
-                    "name": "HelloWorldIntent",
-                    "slots": [],
-                    "samples": [
-                        "hello",
-                        "how are you",
-                        "say hi world",
-                        "say hi",
-                        "hi",
-                        "say hello world",
-                        "say hello"
-                    ]
-                },
-                {
                     "name": "AMAZON.NavigateHomeIntent",
                     "samples": []
                 },
@@ -37,41 +29,365 @@
                     "samples": []
                 },
                 {
-                    "name": "BMIIntent",
+                    "name": "GoalIntent",
                     "slots": [
+                        {
+                            "name": "goal",
+                            "type": "fitnessGoals",
+                            "samples": [
+                                "my fitness goal is {goal}",
+                                "my goal is {goal}",
+                                "my goal is to {goal}",
+                                "{goal}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "I'm putting effort into {goal}",
+                        "I'm focused on achieving {goal}",
+                        "My ultimate goal is {goal}",
+                        "I'm determined to {goal}",
+                        "My objective is {goal}",
+                        "I'm working towards {goal}",
+                        "i would like to {goal}",
+                        "my fitness goal is to {goal}",
+                        "{goal}",
+                        "my goal is to {goal}"
+                    ]
+                },
+                {
+                    "name": "WorkoutDetailsIntent",
+                    "slots": [
+                        {
+                            "name": "sets",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{sets} sets",
+                                "{sets}"
+                            ]
+                        },
+                        {
+                            "name": "workoutname",
+                            "type": "Workouts",
+                            "samples": [
+                                "the workout name is {workoutname}",
+                                "the workout is {workoutname}",
+                                "{workoutname}"
+                            ]
+                        },
+                        {
+                            "name": "reps",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{reps}",
+                                "{reps} reps each set"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "i did {sets} sets",
+                        "i performed {sets} sets",
+                        " I performed {sets} sets of {workoutname}  aiming for {reps} reps in each set",
+                        "I accomplished {sets} sets of {workoutname} doing {reps} reps in each set",
+                        "For my workout I did {sets} sets of {workoutname} with {reps} reps per set",
+                        "I completed {sets} sets of {workoutname} with {reps} reps in each set",
+                        "I did {sets} sets of {workoutname} with {reps} reps each"
+                    ]
+                },
+                {
+                    "name": "LaunchOptionIntent",
+                    "slots": [
+                        {
+                            "name": "option",
+                            "type": "options",
+                            "samples": [
+                                "{option}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "My decision is to try option {option}",
+                        "I think I'll try out option {option}",
+                        "Let's give option {option} a shot",
+                        "let's go with option {option}",
+                        "i will try option {option}",
+                        "i will try {option}",
+                        "choose the {option}",
+                        "choose {option}",
+                        "option {option}"
+                    ]
+                },
+                {
+                    "name": "UpdateProfileIntent",
+                    "slots": [
+                        {
+                            "name": "attribute",
+                            "type": "ATTRIBUTES"
+                        },
+                        {
+                            "name": "value",
+                            "type": "AMAZON.NUMBER",
+                            "multipleValues": {
+                                "enabled": false
+                            }
+                        },
+                        {
+                            "name": "gender",
+                            "type": "genderTypes"
+                        },
+                        {
+                            "name": "name",
+                            "type": "AMAZON.FirstName"
+                        },
+                        {
+                            "name": "fitnessgoal",
+                            "type": "fitnessGoals"
+                        },
+                        {
+                            "name": "fitnessLevel",
+                            "type": "fitnesslevels"
+                        }
+                    ],
+                    "samples": [
+                        "{attribute}",
+                        "update my {attribute} to {value} centimetres",
+                        "update my {attribute} to {value} kilograms",
+                        "change my {attribute} to {value} centimeteres",
+                        "change my {attribute} to {value} kilograms",
+                        "update my {attribute} to {fitnessLevel}",
+                        "change my {attribute} to {fitnessLevel}",
+                        "change my {attribute} to {fitnessgoal}",
+                        "update my {attribute} to {fitnessgoal}",
+                        "change my {attribute} to {gender}",
+                        "change my {attribute} to {name}",
+                        "{attribute} should be {name}",
+                        "my {attribute} should be {name}",
+                        "update my {attribute} to {name}",
+                        "update {attribute} to {gender}",
+                        "set the {attribute} as {value}",
+                        "my {attribute} is {value}",
+                        "set {attribute} {value}",
+                        "please update {attribute} to {value}",
+                        "set {attribute} to {value}",
+                        "please continue {attribute} to {value}",
+                        "I want {attribute} to be {value}",
+                        "{attribute} should be {value}",
+                        "Assign {value} to {attribute}",
+                        "Modify {attribute} to {value}",
+                        "Update {attribute} to {value}",
+                        "Change {attribute} to {value}",
+                        "Set {attribute} as {value}",
+                        "update my {attribute} to {value}",
+                        "Please update my {attribute} to {value}"
+                    ]
+                },
+                {
+                    "name": "FitnessLevelIntent",
+                    "slots": [
+                        {
+                            "name": "fitnessLevel",
+                            "type": "fitnesslevels",
+                            "samples": [
+                                "{fitnessLevel}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "I'm a {fitnessLevel}",
+                        "I would describe myself as {fitnessLevel}",
+                        "I've been working hard so I'd say I'm at a {fitnessLevel}",
+                        "If I had to rate it I'd say I'm at a {fitnessLevel}",
+                        "My fitness Level is {fitnessLevel}",
+                        "{fitnessLevel}",
+                        "I am a {fitnessLevel} ",
+                        "I would rate myself as {fitnessLevel}"
+                    ]
+                },
+                {
+                    "name": "WorkoutIntent",
+                    "slots": [
+                        {
+                            "name": "control",
+                            "type": "workoutcontrol"
+                        }
+                    ],
+                    "samples": [
+                        "give me the {control} workout",
+                        "can you {control} me",
+                        "what's the {control} workout",
+                        "{control} me",
+                        "{control} workout",
+                        "{control} the workout"
+                    ]
+                },
+                {
+                    "name": "UpdateWorkoutDbIntent",
+                    "slots": [],
+                    "samples": [
+                        "update workout database"
+                    ]
+                },
+                {
+                    "name": "UserGenInfoIntent",
+                    "slots": [
+                        {
+                            "name": "name",
+                            "type": "AMAZON.FirstName",
+                            "samples": [
+                                "my name is {name}",
+                                "call me {name} "
+                            ]
+                        },
+                        {
+                            "name": "age",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{age}"
+                            ]
+                        },
+                        {
+                            "name": "gender",
+                            "type": "genderTypes",
+                            "samples": [
+                                "{gender}"
+                            ]
+                        },
                         {
                             "name": "height",
                             "type": "AMAZON.NUMBER",
                             "samples": [
-                                "{height}"
+                                "{height}",
+                                "{height} centimetres"
                             ]
                         },
                         {
                             "name": "weight",
                             "type": "AMAZON.NUMBER",
                             "samples": [
+                                "{weight} kilograms",
                                 "{weight}"
                             ]
                         }
                     ],
                     "samples": [
-                        "{weight}",
-                        "{height}",
-                        "my height is {height} and weight is {weight}",
-                        "{height} {weight}"
+                        "create profile",
+                        "i'm {height} centrimetres tall",
+                        "i am {height} centrimetres tall",
+                        "I am a {gender}",
+                        "I identify as {gender}",
+                        "I'm currently {age} years old",
+                        "I go by {name}",
+                        "Address me by the name {name}",
+                        "They named me {name}",
+                        "Hi there I'm {name}",
+                        "Just call me {name}",
+                        "i'm {age} years old",
+                        "i'm {age}",
+                        "{weight} kilograms",
+                        "{height} centimetres",
+                        "i'm a {gender}",
+                        "i'm {name}",
+                        "my name is {name}",
+                        "{gender}"
                     ]
                 },
                 {
-                    "name": "GoalIntent",
+                    "name": "StrengthWorkoutIntent",
                     "slots": [
                         {
-                            "name": "goal",
-                            "type": "fitnessGoals"
+                            "name": "type",
+                            "type": "StrengthOrCardio",
+                            "samples": [
+                                "{type}"
+                            ]
+                        },
+                        {
+                            "name": "workoutname",
+                            "type": "Workouts",
+                            "samples": [
+                                "{workoutname}"
+                            ]
+                        },
+                        {
+                            "name": "sets",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{sets} sets",
+                                "{sets}"
+                            ]
+                        },
+                        {
+                            "name": "reps",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{reps}",
+                                "{reps} reps"
+                            ]
+                        },
+                        {
+                            "name": "time",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{time} {timeunit}"
+                            ]
+                        },
+                        {
+                            "name": "timeunit",
+                            "type": "timeUnit"
                         }
                     ],
                     "samples": [
-                        "{goal}",
-                        "my goal is to {goal}"
+                        "record a workout",
+                        "i want to record a workout",
+                        "record my workout",
+                        "{workoutname}",
+                        "{type}",
+                        "record next workout",
+                        "{reps} reps",
+                        "{sets} sets",
+                        "i did {workoutname}"
+                    ]
+                },
+                {
+                    "name": "SendEmailIntent",
+                    "slots": [],
+                    "samples": [
+                        "send email"
+                    ]
+                },
+                {
+                    "name": "CallUpdateProfileIntent",
+                    "slots": [],
+                    "samples": [
+                        "i want to change my details",
+                        "i would like to update my profile",
+                        "I want to update my profile"
+                    ]
+                },
+                {
+                    "name": "GetWorkoutScheduleIntent",
+                    "slots": [],
+                    "samples": [
+                        "send my workout plan",
+                        "resend my workout schedule",
+                        "send my workout schedule"
+                    ]
+                },
+                {
+                    "name": "GetProgressIntent",
+                    "slots": [],
+                    "samples": [
+                        "send my  progress",
+                        "mail my workout progress",
+                        "send my workout progress"
+                    ]
+                },
+                {
+                    "name": "RefreshWorkoutIntent",
+                    "slots": [],
+                    "samples": [
+                        "send new workout",
+                        "refresh my workout"
                     ]
                 }
             ],
@@ -90,25 +406,660 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "yesRno",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "no"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "yes"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "genderTypes",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "female"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "male"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "options",
+                    "values": [
+                        {
+                            "id": "6",
+                            "name": {
+                                "value": "repeat the options",
+                                "synonyms": [
+                                    "repeat",
+                                    "repeat it",
+                                    "repeat that",
+                                    "say that again",
+                                    "six"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "5",
+                            "name": {
+                                "value": "get progress report",
+                                "synonyms": [
+                                    "five"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "4",
+                            "name": {
+                                "value": "get workout schedule",
+                                "synonyms": [
+                                    "four"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "3",
+                            "name": {
+                                "value": "start or continue workout",
+                                "synonyms": [
+                                    "three"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "2",
+                            "name": {
+                                "value": "record a workout",
+                                "synonyms": [
+                                    "two"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "1",
+                            "name": {
+                                "value": "update my profile",
+                                "synonyms": [
+                                    "one"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ATTRIBUTES",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "fitness level"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "weight"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "fitnessGoal"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "name"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "height"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "gender"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "age"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "fitnesslevels",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "expert"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "intermediate"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "beginner"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "workoutcontrol",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "instruct"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "continue"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "start"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "next"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "StrengthOrCardio",
+                    "values": [
+                        {
+                            "id": "2",
+                            "name": {
+                                "value": "cardio"
+                            }
+                        },
+                        {
+                            "id": "1",
+                            "name": {
+                                "value": "strength"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "timeUnit",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "minutes",
+                                "synonyms": [
+                                    "hr"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "hour",
+                                "synonyms": [
+                                    "mins"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Workouts",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "Bicep curls",
+                                "synonyms": [
+                                    "curls"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Incline Hammer Curls"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Bicycling",
+                                "synonyms": [
+                                    "cycling"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Tire flip"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Dumbbell Bench Press"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Barbell Full Squat"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Weighted Jump Squat"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Elevated Cable Rows"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Cable V Bar Push Down"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Kneeling cable triceps extension"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Biceps curl to shoulder press"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Machine assisted pull-up"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Hammer Curls"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Pullups"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Triceps dip"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Weighted Squat",
+                                "synonyms": [
+                                    "squat",
+                                    "squats"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Weighted bench dip"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Decline EZ bar skullcrusher"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "EZ Bar Curl"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Low cable crossover"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Reverse Band Box Squat"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Concentration curl"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Jumping rope"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "EZ bar spider curl"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Closegrip bench press"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Cable Vbar push-down"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Decline Dumbbell Triceps Extension"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Dumbbell Flyes"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Incline dumbbell bench press"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "SingleLeg Press"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "PushUps Close Triceps Position",
+                                "synonyms": [
+                                    "tricep pushups",
+                                    "close grip pushups"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Slow Jog"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Clean from Blocks"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Rope climb"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "WideGrip Rear Pull-Up"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Decline Dumbbell Flyes"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Machine seated row"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "CloseGrip Front Lat Pulldown"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Barbell Curl"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Pushups"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Singlearm kneeling lat pull-down"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "pushpress"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "rower"
+                            }
+                        }
+                    ]
                 }
             ]
         },
         "dialog": {
             "intents": [
                 {
-                    "name": "BMIIntent",
+                    "name": "UpdateProfileIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "attribute",
+                            "type": "ATTRIBUTES",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "value",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "gender",
+                            "type": "genderTypes",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "name",
+                            "type": "AMAZON.FirstName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "fitnessgoal",
+                            "type": "fitnessGoals",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "fitnessLevel",
+                            "type": "fitnesslevels",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        }
+                    ]
+                },
+                {
+                    "name": "FitnessLevelIntent",
                     "delegationStrategy": "ALWAYS",
                     "confirmationRequired": false,
                     "prompts": {},
                     "slots": [
+                        {
+                            "name": "fitnessLevel",
+                            "type": "fitnesslevels",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.769745174358.701249761008"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "WorkoutDetailsIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "sets",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.259419435570.1159456855398"
+                            }
+                        },
+                        {
+                            "name": "workoutname",
+                            "type": "Workouts",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.259419435570.1253805649302"
+                            }
+                        },
+                        {
+                            "name": "reps",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.259419435570.79544555209"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "LaunchOptionIntent",
+                    "delegationStrategy": "SKILL_RESPONSE",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "option",
+                            "type": "options",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.489364393142.305588848195"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "GoalIntent",
+                    "delegationStrategy": "SKILL_RESPONSE",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "goal",
+                            "type": "fitnessGoals",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.132779912061.1320004363792"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "UserGenInfoIntent",
+                    "delegationStrategy": "SKILL_RESPONSE",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "name",
+                            "type": "AMAZON.FirstName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.845814216620.1273309429556"
+                            }
+                        },
+                        {
+                            "name": "age",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.845814216620.1504937883239"
+                            },
+                            "validations": [
+                                {
+                                    "type": "isLessThanOrEqualTo",
+                                    "prompt": "Slot.Validation.1691082004650.75867555724.79843879206",
+                                    "value": "120"
+                                },
+                                {
+                                    "type": "isGreaterThanOrEqualTo",
+                                    "prompt": "Slot.Validation.1691082004650.75867555724.240800176589",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "gender",
+                            "type": "genderTypes",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.845814216620.1600240294700"
+                            }
+                        },
                         {
                             "name": "height",
                             "type": "AMAZON.NUMBER",
                             "confirmationRequired": false,
                             "elicitationRequired": true,
                             "prompts": {
-                                "elicitation": "Elicit.Slot.1560171362266.412165027567"
-                            }
+                                "elicitation": "Elicit.Slot.845814216620.265102723581"
+                            },
+                            "validations": [
+                                {
+                                    "type": "isGreaterThanOrEqualTo",
+                                    "prompt": "Slot.Validation.1691082004650.308818545769.747620504167",
+                                    "value": "55"
+                                },
+                                {
+                                    "type": "isLessThanOrEqualTo",
+                                    "prompt": "Slot.Validation.1691082004650.308818545769.40644990123",
+                                    "value": "300"
+                                }
+                            ]
                         },
                         {
                             "name": "weight",
@@ -116,8 +1067,80 @@
                             "confirmationRequired": false,
                             "elicitationRequired": true,
                             "prompts": {
-                                "elicitation": "Elicit.Slot.1560171362266.1051761478767"
+                                "elicitation": "Elicit.Slot.845814216620.1364254184216"
+                            },
+                            "validations": [
+                                {
+                                    "type": "isLessThanOrEqualTo",
+                                    "prompt": "Slot.Validation.1691082004650.45338372210.1258072561854",
+                                    "value": "650"
+                                },
+                                {
+                                    "type": "isGreaterThanOrEqualTo",
+                                    "prompt": "Slot.Validation.339731329703.679633435558.447690174132",
+                                    "value": "20"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "StrengthWorkoutIntent",
+                    "delegationStrategy": "SKILL_RESPONSE",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "type",
+                            "type": "StrengthOrCardio",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.356262430739.228186796575"
                             }
+                        },
+                        {
+                            "name": "workoutname",
+                            "type": "Workouts",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1350659426258.621432442705"
+                            }
+                        },
+                        {
+                            "name": "sets",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1350659426258.459787962830"
+                            }
+                        },
+                        {
+                            "name": "reps",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1350659426258.1232707212444"
+                            }
+                        },
+                        {
+                            "name": "time",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.356262430739.774695176929"
+                            }
+                        },
+                        {
+                            "name": "timeunit",
+                            "type": "timeUnit",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
                         }
                     ]
                 }
@@ -140,6 +1163,334 @@
                     {
                         "type": "PlainText",
                         "value": "What's your weight?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1041467870976.478584144082",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "how many workouts were done"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.736567302539.491925325802",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what is your age?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.259419435570.79544555209",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "how many reps did you do for each set"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.26249603633.1013899366598",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what was the workout"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.26249603633.1037394661772",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "how many workouts did you do"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.132779912061.1320004363792",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "your fitness goal falls under which category, Muscle gain or weight loss?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.689156386975.993041335607",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what is your name"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.769745174358.701249761008",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "your fitness goal falls under which category Muscle gain or weight loss "
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.259419435570.1159456855398",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "how many sets did you do"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.259419435570.1253805649302",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what was the workout"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.489364393142.305588848195",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "choose an option from one to five, one. Update my profile, two. Record a workout, three. start or continue workout,  four. Get workout schedule, five. send workout progress, if you want to repeat the options, say 'repeat'"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.514339672748.939367508340",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what's your name"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1059801781078.79781313264",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "how many workouts did you do?"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.158975910613.533778578091.1343962858103",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "{height} is too high for height, Please check your height and provide the right value"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.158975910613.533778578091.1603596072682",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "{height} is too low for height, Please check your height and provide the right value"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.835384206439.548200319533",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "how many workouts?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.845814216620.1273309429556",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what is your name?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.845814216620.1504937883239",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Hello {name} , what's your age?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "Hello {name} , how old are you?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.845814216620.1600240294700",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Got it. you are {age} years old, what is your gender, male or female"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.845814216620.265102723581",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Noted your gender as {gender} . What is your height in centimetres"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.845814216620.1364254184216",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Alright. your height is {height}  centimetres, what's your weight in kilograms"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.1691082004650.308818545769.747620504167",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Hmm, {height} centimetres is too short, try again with correct value"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.1691082004650.308818545769.40644990123",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Hmm, {height} centimetres is too tall, try again with correct value"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.1691082004650.75867555724.79843879206",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "you have given {age} as your age, that can't be true, try again with correct value"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.1691082004650.75867555724.240800176589",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "you have given {age} as your age, that can't be true, try again with correct value"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.1691082004650.45338372210.1258072561854",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "{weight} is too heavy, that can't be true for weight, try again"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.339731329703.679633435558.447690174132",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "{weight} is too light, that can't be true for weight, try again"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.239623062402.535146571813",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what was the workout?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1190787898536.631435036297",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what was the type of workout, strength or cardio?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1350659426258.621432442705",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what was the workout?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1350659426258.459787962830",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "how many sets of {workoutname} did you do?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1350659426258.1232707212444",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "how many reps did you do for each set?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.92398818743.1442060673096",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What was the workout?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.92398818743.471914733605",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "for how long did you do {workoutname} ?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.356262430739.228186796575",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what type of workout was it, Strength or Cardio?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.356262430739.774695176929",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "how long did you do?"
                     }
                 ]
             }

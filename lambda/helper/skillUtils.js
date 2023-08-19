@@ -27,7 +27,7 @@ function calculateBMI(height, weight) {
 }
 
 function updateProfPrompt(user){
-  return speechText=`Based on your profile, your name is ${user.name}, you are ${user.gender} and ${user.age} years old. your height is ${user.height} centimetres, weight is ${user.weight} kilograms and your BMI is ${user.bmi}. your fitness goal is ${user.fitnessGoal} and current fitness level is ${user.fitnessLevel}. To update any of this, For example to update your age, Please say update my age to and the new value followed by it` 
+  return speechText=`Based on your profile, your name is ${user.name}, you are ${user.gender} and ${user.age} years old. your height is ${user.height} centimetres, weight is ${user.weight} kilograms and your BMI is ${user.bmi}. your fitness goal is ${user.fitnessGoal} and current fitness level is ${user.fitnessLevel}. ` 
 }
 
 var workoutdata=

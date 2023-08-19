@@ -11,7 +11,7 @@ var scheduleTable= function (workoutData) {
         htmlTable+=`<tr ><td>${day}</td><td colspan='4'>Rest Day</td></tr>`
       }
       else{
-      htmlTable+=`<tr ><td rowspan='5'>${day}</td>`
+      htmlTable+=`<tr ><td rowspan='${workouts.length}'>${day}</td>`
       workouts.forEach((workout) => {
         if(workout.muscle==="cardio")
           htmlTable += `<td>${workout.workout}</td><td>${workout.muscle}</td><td>${workout.time} mins</td></tr><tr>`;
@@ -44,7 +44,6 @@ var scheduleTable= function (workoutData) {
 var recordTable= function (workoutData) {
 
   
-
     let htmlTable = '<table border="1">';
     htmlTable += '<tr><th>Day</th><th>Workout</th><th>Sets&Reps/Time</th></tr>';
   
@@ -54,15 +53,16 @@ var recordTable= function (workoutData) {
     var options = { year: 'numeric', month: 'long', day: 'numeric' };
     var dateString = currentDate.toLocaleDateString('en-US', options);
       
-      const workouts = value.workouts;
-      htmlTable+=`<tr ><td rowspan='${Object.keys(workouts).length}'>${dateString}</td>`
-      Object.values(workouts).forEach((workout) => {
+      const workoutsArray = value.workouts;
+      console.log(workoutsArray)
+      htmlTable+=`<tr ><td rowspan='${Object.keys(workoutsArray).length}'>${dateString}</td>`
+      workoutsArray.forEach((workout)=>{
         if(workout.type==="cardio")
-          htmlTable += `<td>${workout.workoutname}</td><<td>${workout.time}</td></tr><tr>`;
+          htmlTable += `<td>${workout.workoutname}</td><td>${workout.time}</td></tr><tr>`;
         else
           htmlTable += `<td>${workout.workoutname}</td><td>${workout.sets} sets of ${workout.reps} reps</td></tr><tr>`;
       });
-    
+
     }
   
     htmlTable += '</table>';

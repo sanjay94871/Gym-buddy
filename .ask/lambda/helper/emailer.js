@@ -24,8 +24,10 @@ AWS.config.update({
 var getEmail= async function (handlerInput){
   const { serviceClientFactory, responseBuilder } = handlerInput;
   try {
+    
     const upsServiceClient = serviceClientFactory.getUpsServiceClient();
     profileEmail = await upsServiceClient.getProfileEmail();
+    
   } catch (error) {
     if (error.statusCode == 403) {
       return responseBuilder
@@ -33,7 +35,7 @@ var getEmail= async function (handlerInput){
       .withAskForPermissionsConsentCard([EMAIL_PERMISSION])
       .getResponse();
     }
-    console.log("error");
+    console.log("error at getting email address"+error);
     const response = responseBuilder.speak(messages.ERROR).getResponse();
     return response;
   }
@@ -42,10 +44,11 @@ var getEmail= async function (handlerInput){
 var emailer= async function (optionforEmail,handlerInput,workoutData){
 // Function to convert workout data into an HTML table
 await getEmail(handlerInput);
-var emailText='',filename='',subject=''
+var emailText='',filename='',subject='',speechText=''
 
 if(optionforEmail===1){
   var htmlContent=scheduleTable(workoutData)
+  speechText='Your personalized workout plan has been mailed to you'
   emailText="Here's your personalised workout plan"
   filename="workout_schedule.html"
   subject="Workout Plan"
@@ -53,6 +56,7 @@ if(optionforEmail===1){
 else
 {
   var htmlContent=recordTable(workoutData)
+  speechText='Your workout progress report has been mailed to you'
   emailText="Here's your progress report"
   filename="progress_report.html"
   subject="Workout Progress Report"
@@ -69,21 +73,21 @@ fs.writeFile(`/tmp/${filename}`, htmlContent, (err) => {
 });
 
 
-
 const ses = new aws.SES({
     apiVersion: "2010-12-01",
     region: "us-east-1",
     defaultProvider,
   });
+
   
   // create Nodemailer SES transporter
   let transporter = nodemailer.createTransport({
     SES: { ses, aws },
   });
-  
+
 
   // send some mail
-  transporter.sendMail(
+ transporter.sendMail(
     {
       from: profileEmail,
       to: profileEmail,
@@ -98,16 +102,21 @@ const ses = new aws.SES({
     },
     (err, info) => {
       if(err){
+      console.log(err)
       return handlerInput.responseBuilder
       .speak(messages.NOTIFY_MISSING_PERMISSIONS)
       .withAskForPermissionsConsentCard([EMAIL_PERMISSION])
       .getResponse();
     }
     else{
-      console.log(info.envelope)
+      console.log("mail sent")
+      // return handlerInput.responseBuilder
+      // .speak(speechText)
+      // .getResponse()
     }
   }
   );
+
 }
 
 module.exports= emailer;
