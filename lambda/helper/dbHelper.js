@@ -32,6 +32,44 @@ dbHelper.prototype.getWorkout = () => {
     });
 }
 
+dbHelper.prototype.getWorkoutDemo = async (nameofworkout) => {
+    try {
+        const params = {
+          TableName: "workout", // Replace with your DynamoDB table name
+          Key: {name:nameofworkout}
+        };
+    
+        const data = await docClient.get(params).promise();
+        return data.Item;
+      } catch (error) {
+        console.log('Error retrieving user data:', error);
+        return null;
+      }
+}
+
+dbHelper.prototype.getWorkoutNames = async () => {
+
+const projectionExpression = '#name'; // Use the expression attribute name in the projection
+
+const expressionAttributeNames = {
+  '#name': 'name' // Mapping the expression attribute name to the actual attribute name
+};
+    try {
+        const params = {
+          TableName: "workout", // Replace with your DynamoDB table name
+          ProjectionExpression:projectionExpression,
+          ExpressionAttributeNames: expressionAttributeNames
+
+        };
+    
+        const data = await docClient.scan(params).promise();
+        return data.Items.map(item => item.name);
+      } catch (error) {
+        console.log('Error retrieving user data:', error);
+        return null;
+      }
+}
+
 dbHelper.prototype.updateWorkoutdb = (workout) => {
     return new Promise((resolve, reject) => {
 
@@ -136,6 +174,23 @@ dbHelper.prototype.getUserFromDynamoDB=async (userId,personId) =>{
       }
 
 }
+
+dbHelper.prototype.deleteUser=async (userId,personId) =>{
+        const params = {
+          TableName: usertable, // Replace with your DynamoDB table name
+          Key: {'userId' :userId, 'personId':personId}
+        };
+    
+        docClient.delete(params, (error, data) => {
+            if (error) {
+              console.error('Error deleting item:', error);
+            } else {
+              console.log('Item deleted successfully:', data);
+            }
+          });
+
+}
+
 dbHelper.prototype.getAllUsers=async () =>{
     return new Promise((resolve, reject) => {
         const params = {
@@ -154,32 +209,8 @@ dbHelper.prototype.getAllUsers=async () =>{
 }
 
 
-dbHelper.prototype.storeWorkoutinDB = (userId,personId,workoutdict) => {
-    return new Promise((resolve, reject) => {
-        var currentDate=new Date()
-        var options = { year: 'numeric', month: 'long', day: 'numeric' };
-        var dateString = currentDate.toLocaleDateString('en-US', options);
-    
-        const params = {
-        TableName: 'WorkoutRecord',
-        Item: {
-            userId: userId,
-            personId:personId,
-            createdOn: new Date().toISOString(),
-            workouts:workoutdict
-        },
-    };
-
-    try {
-        docClient.put(params).promise();
-        console.log('Recorded workouts saved to DynamoDB:', userId);
-    } catch (error) {
-        console.error('Error saving user ID to DynamoDB:', error);
-    }
-});
-}
-
 dbHelper.prototype.getRecordedWorkouts = async (userId,personId) => {
+    console.log("userid:"+userId+"\npersonid:"+personId)
     return new Promise((resolve, reject) => {
         const params = {
             TableName: 'WorkoutRecord',
@@ -205,17 +236,17 @@ dbHelper.prototype.getRecordedWorkouts = async (userId,personId) => {
     });
 }
 
-dbHelper.prototype.newstoreWorkoutinDB = (userId,personId,workoutdict) =>{
+dbHelper.prototype.storeWorkoutinDB = (userId,personId,workoutdict) =>{
 
 
     var currentDate=new Date()
     var options = { year: 'numeric', month: 'long', day: 'numeric' };
     var dateString = currentDate.toLocaleDateString('en-US', options);
-// Check if the partition key value exists
-const getItemParams = {
-  TableName: 'WorkoutRecord',
-  Key: {createdOn: dateString},
-};
+    // Check if the partition key value exists
+    const getItemParams = {
+      TableName: 'WorkoutRecord',
+      Key: {createdOn: dateString},
+    };
 
 docClient.get(getItemParams, (error, data) => {
   if (error) {
@@ -223,9 +254,7 @@ docClient.get(getItemParams, (error, data) => {
   } else {
     if (data.Item && data.Item.userId===userId && data.Item.personId===personId) {
       // Item exists, update the item with the new value
-      
       var updatedWorkout=data.Item.workouts.concat(workoutdict)
-      console.log(updatedWorkout)
 
       const updateParams = {
         TableName: 'WorkoutRecord',

@@ -53,22 +53,18 @@ var findMostSimilarUser= async function (targetUser) {
     // Convert target user data to a vector
     const vectorTargetUser = [
         targetUser.age,
-        targetUser.bmi,
-        targetUser.gender === 'male' ? 1 : 0,
-        fitnessGoalMap[targetUser.fitnessGoal], // Map fitness goal to numerical value
+        targetUser.bmi, 
         fitnessLevelMap[targetUser.fitnessLevel] // Map fitness level to numerical value
     ];
 
     for (const user of usersArray) {
-           if (targetUser.gender !== user.gender) {
-            continue; // Skip users with different gender
+           if (targetUser.gender !== user.gender || targetUser.fitnessGoal !== user.fitnessGoal) {
+            continue; // Skip users with different gender and different fitnessGoal
         }
         // Convert current user data to a vector
         const vectorCurrentUser = [
             user.age,
-            user.bmi,
-            user.gender === 'male' ? 1 : 0,
-            fitnessGoalMap[user.fitnessGoal], // Map fitness goal to numerical value
+            user.bmi, 
             fitnessLevelMap[user.fitnessLevel] // Map fitness level to numerical value
         ];
 
@@ -77,8 +73,11 @@ var findMostSimilarUser= async function (targetUser) {
 
         // Check if the current user is more similar than the previous most similar user
         if (similarity > highestSimilarity) {
+
             highestSimilarity = similarity;
-            mostSimilarUser = user;
+            console.log(highestSimilarity)
+            if(highestSimilarity>=0.999)
+                 mostSimilarUser = user;
         }
     }
 

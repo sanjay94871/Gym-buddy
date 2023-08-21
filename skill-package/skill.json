@@ -5,9 +5,10 @@
         "en-US": {
           "summary": "Sample Short Description",
           "examplePhrases": [
-            "Alexa open hello world",
-            "hello",
-            "help"
+            "Alexa open gym buddy",
+            "send my workout plan",
+            "refresh my workout",
+            "send my workout progress"
           ],
           "name": "gymbuddy",
           "description": "Sample Full Description"

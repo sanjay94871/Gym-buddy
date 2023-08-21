@@ -254,7 +254,86 @@ const WorkoutDetailsIntentHandler={
     }
   }
   
-
+  const LaunchOptionIntentHandler={
+    canHandle(handlerInput) {
+      return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+        && Alexa.getIntentName(handlerInput.requestEnvelope) === 'LaunchOptionIntent' ||
+        Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.SelectIntent';
+    },
+    async handle(handlerInput) {
+      try{
+      const request=handlerInput.requestEnvelope.request
+      const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+  
+      var speechText
+  
+      if(Alexa.getIntentName(handlerInput.requestEnvelope) === 'LaunchOptionIntent')
+         var option = handlerInput.requestEnvelope.request.intent.slots.option.resolutions.resolutionsPerAuthority[0].values[0].value.id;
+      else
+        var option = handlerInput.requestEnvelope.request.intent.slots.ListPosition.value  
+     
+      switch(option){
+        case '1':speechText = skillUtils.updateProfPrompt(existingUser);
+                  break;
+        case '2':speechText = `Great! What type of workout was it, Strength or Cardio?`;
+                sessionAttributes.currentWorkout=0;
+                break;
+                    
+        case '3':speechText = 'Do you want to start a workout or continue previous workout?';
+                break;
+                  
+        case '4': let workoutPlan='';
+                let scheduleData= await dbHelper.getWorkoutSchedule(existingUser.userId,existingUser.personId)
+                  workoutPlan=scheduleData.workout;
+                    console.log(workoutPlan)
+                    var re= await emailer(1,handlerInput,workoutPlan)
+                    console.log(re)
+                    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+                    speechText = `your personalized workout plan has been mailed to you`;
+                    sessionAttributes.previouslySaid=speechText;break;
+  
+        case '5' :try{
+                  const data= await dbHelper.getRecordedWorkouts(userInfo.userId,userInfo.personId)
+                  console.log(data)
+                    if(!data)
+                      speechText='You dont have any recorded workouts yet'
+                    else
+                      {
+                        speechText="Your Workout Progress Report has been mailed to you"
+                        emailer(2,handlerInput,data)
+                        sessionAttributes.optionforEmail=2;
+                      } 
+                    } 
+                  catch(err){
+                    console.log(err)
+                  }
+                  break;          
+        case '6':speechText=`<speak>Choose an option from 1-6. 1. Update my profile, 2. Record a workout, 3. start or continue workout,  4. Get workout schedule, 5. Send Progress Report, if you want to repeat the options, say 'repeat'</speak>`;
+                  sessionAttributes.previouslySaid=speechText
+                  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+                  return handlerInput.responseBuilder
+                  .addDelegateDirective(
+                  {
+                    name: 'AMAZON.RepeatIntent',
+                    confirmationStatus: 'NONE',
+                    slots: {}
+                 })
+                    .getResponse();
+       
+      }
+      sessionAttributes.previouslySaid=speechText
+      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+  
+      return handlerInput.responseBuilder
+        .speak(speechText)
+        .reprompt(speechText)
+        .getResponse(); 
+    }
+    catch(err){
+      console.log(err)
+    }
+  }
+  }
         // case '2': const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
       //            sessionAttributes.currentWorkout=0;
       //            handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
@@ -266,3 +345,16 @@ const WorkoutDetailsIntentHandler={
       //             slots: {}
       //          })
       //             .getResponse();
+
+      // var userInfo ={
+//   userId:'',
+//   personId:'',
+//   name:'',
+//   age:'',
+//   gender:'',
+//   height:'',
+//   weight:'',
+//   fitnessGoal:'',
+//   bmi:'',
+//   fitnessLevel:''
+// }

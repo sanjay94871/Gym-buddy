@@ -1,10 +1,12 @@
 const dbHelper= require("./dbHelper")
+const weekdays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 
 var scheduleTable= function (workoutData) {
     let htmlTable = '<table border="1">';
     htmlTable += '<tr><th>Day</th><th>Workout</th><th>Target</th><th>Sets&Reps/Time</th></tr>';
+    console.log(workoutData)
     
-    for (const day in workoutData) {
+    weekdays.forEach((day)=> {
 
       const workouts = workoutData[day];
       if(workouts.length==0){
@@ -19,7 +21,7 @@ var scheduleTable= function (workoutData) {
           htmlTable += `<td>${workout.workout}</td><td>${workout.muscle}</td><td>${workout.sets} sets of ${workout.reps} reps</td></tr><tr>`;
       });
     }
-    }
+    });
   
     htmlTable += '</table>';
   

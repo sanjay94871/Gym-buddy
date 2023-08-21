@@ -13,18 +13,7 @@ const util=require("./util.js")
 const DynamoDBAdapter = require('ask-sdk-dynamodb-persistence-adapter');
 
 var bmi,existingUser;
-var userInfo ={
-  userId:'',
-  personId:'',
-  name:'',
-  age:'',
-  gender:'',
-  height:'',
-  weight:'',
-  fitnessGoal:'',
-  bmi:'',
-  fitnessLevel:''
-}
+var userInfo={}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Handler for the LaunchRequest
@@ -33,14 +22,15 @@ const LaunchRequestHandler = {
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
   },
   async handle(handlerInput) {
+    const persistentAttributes = await handlerInput.attributesManager.getPersistentAttributes()
     const {user,person}=handlerInput.requestEnvelope.context.System
     const userId = user.userId
     const personId=(person)?(person.personId):"null";
-    console.log(personId)
     
     existingUser = await dbHelper.getUserFromDynamoDB(userId,personId);
 
-    if(existingUser){
+    if(existingUser)
+    {
       userInfo={...existingUser}
       const speechText =`<speak>Welcome Back ${existingUser.name}. How can I assist you? </speak>`;
       return handlerInput.responseBuilder
@@ -48,110 +38,82 @@ const LaunchRequestHandler = {
                .reprompt(speechText)
                 .getResponse();
     }
-    else{
-    const speechText = 'Welcome to the Gym Workout Planner. We will start by creating a profile for you. What is your name?';
-    userInfo.userId = userId
-    userInfo.personId=personId
-    return handlerInput.responseBuilder
+    else
+    {
+      var speechText = 'Welcome to the Gym Workout Planner. We will start by creating a profile for you. What is your name?';
+      userInfo.userId = userId
+      userInfo.personId=personId
+
+      if(persistentAttributes.interupptedIntent){
+          var forwardTo=persistentAttributes.interupptedIntent
+          return handlerInput.responseBuilder
+          .speak(`<amazon:emotion name="disappointed" intensity="high">Sorry for the interruption caused, we'll continue from where we left. </amazon:emotion>`)
+          .addDelegateDirective(forwardTo)
+          .getResponse();    
+        }
+
+     return handlerInput.responseBuilder
       .speak(speechText)
-      .reprompt("Welcome to the Gym Workout Planner. We will start by creating a profile for you.")
+      .reprompt(speechText)
       .getResponse();
     }
   },
 };
 
-
-
-const LaunchOptionIntentHandler={
-  canHandle(handlerInput) {
-    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'LaunchOptionIntent' ||
-      Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.SelectIntent';
-  },
-  async handle(handlerInput) {
-    try{
-    const request=handlerInput.requestEnvelope.request
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-
-    var speechText
-
-    if(Alexa.getIntentName(handlerInput.requestEnvelope) === 'LaunchOptionIntent')
-       var option = handlerInput.requestEnvelope.request.intent.slots.option.resolutions.resolutionsPerAuthority[0].values[0].value.id;
-    else
-      var option = handlerInput.requestEnvelope.request.intent.slots.ListPosition.value  
-   
-    switch(option){
-      case '1':speechText = skillUtils.updateProfPrompt(existingUser);
-                break;
-      case '2':speechText = `Great! What type of workout was it, Strength or Cardio?`;
-              sessionAttributes.currentWorkout=0;
-              break;
-                  
-      case '3':speechText = 'Do you want to start a workout or continue previous workout?';
-              break;
-                
-      case '4': let workoutPlan='';
-              let scheduleData= await dbHelper.getWorkoutSchedule(existingUser.userId,existingUser.personId)
-                workoutPlan=scheduleData.workout;
-                  console.log(workoutPlan)
-                  var re= await emailer(1,handlerInput,workoutPlan)
-                  console.log(re)
-                  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-                  speechText = `your personalized workout plan has been mailed to you`;
-                  sessionAttributes.previouslySaid=speechText;break;
-
-      case '5' :try{
-                const data= await dbHelper.getRecordedWorkouts(userInfo.userId,userInfo.personId)
-                console.log(data)
-                  if(!data)
-                    speechText='You dont have any recorded workouts yet'
-                  else
-                    {
-                      speechText="Your Workout Progress Report has been mailed to you"
-                      emailer(2,handlerInput,data)
-                      sessionAttributes.optionforEmail=2;
-                    } 
-                  } 
-                catch(err){
-                  console.log(err)
-                }
-                break;          
-      case '6':speechText=`<speak>Choose an option from 1-6. 1. Update my profile, 2. Record a workout, 3. start or continue workout,  4. Get workout schedule, 5. Send Progress Report, if you want to repeat the options, say 'repeat'</speak>`;
-                sessionAttributes.previouslySaid=speechText
-                handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-                return handlerInput.responseBuilder
-                .addDelegateDirective(
-                {
-                  name: 'AMAZON.RepeatIntent',
-                  confirmationStatus: 'NONE',
-                  slots: {}
-               })
-                  .getResponse();
-     
-    }
-    sessionAttributes.previouslySaid=speechText
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-
-    return handlerInput.responseBuilder
-      .speak(speechText)
-      .reprompt(speechText)
-      .getResponse(); 
-  }
-  catch(err){
-    console.log(err)
-  }
-}
-}
 const callupdateProfileIntentHandler= {
   canHandle(handlerInput) {
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CallUpdateProfileIntent';
   },
   handle(handlerInput) {
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
     var speechText = skillUtils.updateProfPrompt(existingUser);
+
+    sessionAttributes.previouslySaid=speechText;//repeatIntent data
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);//repeatIntent data
+
     return handlerInput.responseBuilder
     .speak(speechText)
     .reprompt(speechText)
+    .getResponse(); 
+  }
+}
+
+const WorkoutDemoIntentHandler= {
+  canHandle(handlerInput) {
+    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'WorkoutDemoIntent';
+  },
+  async handle(handlerInput) {
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    const { slots } = handlerInput.requestEnvelope.request.intent;
+    var nameofworkout= slots.workoutdemo.value
+
+    var workoutnames=await dbHelper.getWorkoutNames()
+    nameofworkout=skillUtils.findSimilarString(nameofworkout,workoutnames)
+    var workoutData=await dbHelper.getWorkoutDemo(nameofworkout)
+
+    var speechText = `I'll help you with some instructions for ${nameofworkout},`+' '+ workoutData['instructions'];
+    sessionAttributes.previouslySaid=speechText;//repeatIntent data
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);//repeatIntent data
+
+    return handlerInput.responseBuilder
+    .speak(speechText)
+    .reprompt(speechText)
+    .getResponse(); 
+  }
+}
+
+const DeleteProfileIntentHandler= {
+  canHandle(handlerInput) {
+    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'DeleteProfileIntent';
+  },
+  handle(handlerInput) {
+    dbHelper.deleteUser(userInfo.userId,userInfo.personId)
+    var speechText = "Your profile has been deleted"
+    return handlerInput.responseBuilder
+    .speak(speechText)
     .getResponse(); 
   }
 }
@@ -163,20 +125,17 @@ const GetWorkoutScheduleIntentHandler= {
   },
   async handle(handlerInput) {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-    let workoutPlan='';
-              let scheduleData= await dbHelper.getWorkoutSchedule(existingUser.userId,existingUser.personId)
-                workoutPlan=scheduleData.workout;
-                  console.log(workoutPlan)
-                  var re= await emailer(1,handlerInput,workoutPlan)
-                  console.log(re)
-                  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-                  var speechText = `your personalized workout plan has been mailed to you`;
-                  sessionAttributes.previouslySaid=speechText;
+    let scheduleData= await dbHelper.getWorkoutSchedule(existingUser.userId,existingUser.personId)
+    let workoutPlan=scheduleData.workout;
+    await emailer(1,handlerInput,workoutPlan)
+    var speechText = `your personalized workout plan has been mailed to you`;
+    sessionAttributes.previouslySaid=speechText;//repeatIntent data
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);//repeatIntent data
 
-                  return handlerInput.responseBuilder
-                  .speak(speechText)
-                  .reprompt(speechText)
-                  .getResponse(); 
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(speechText)
+      .getResponse(); 
   }
 }
 
@@ -187,25 +146,18 @@ const GetProgressIntentHandler= {
   },
   async handle(handlerInput) {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-    try{
-      const data= await dbHelper.getRecordedWorkouts(userInfo.userId,userInfo.personId)
-      console.log(data)
-        if(data.length===0)
-          var speechText='You dont have any recorded workouts yet'
-        else
-          {
-            var speechText="Your Workout Progress Report has been mailed to you"
-            emailer(2,handlerInput,data)
-            sessionAttributes.optionforEmail=2;
-          } 
-        } 
-      catch(err){
-        console.log(err)
-      }
-      return handlerInput.responseBuilder
-      .speak(speechText)
-      .reprompt(speechText)
-      .getResponse(); 
+    const data= await dbHelper.getRecordedWorkouts(userInfo.userId,userInfo.personId)
+    if(data.length===0)
+      var speechText='You dont have any recorded workouts yet'
+    else{
+      var speechText="Your Workout Progress Report has been mailed to you"
+      emailer(2,handlerInput,data)
+      sessionAttributes.optionforEmail=2;
+    } 
+
+  return handlerInput.responseBuilder
+    .speak(speechText)
+    .getResponse(); 
   }
 }
 
@@ -217,19 +169,16 @@ const RefreshWorkoutIntentHandler ={
   async handle(handlerInput) {
     var workoutsAvailable= await dbHelper.getWorkout()
     WorkoutPlan=workoutG(workoutsAvailable,userInfo.fitnessGoal,userInfo.fitnessLevel)
-    //console.log(WorkoutPlan);
     dbHelper.regWorkout(userInfo.userId,userInfo.personId, WorkoutPlan)
     await emailer(1,handlerInput,WorkoutPlan);
     var speechText="A new workoutplan has been mailed to you"
+  
     return handlerInput.responseBuilder
     .speak(speechText)
-    .reprompt(speechText)
     .getResponse();
   }
   
 }
-
-
 
 ///////////////////////////////////------PROFILE UPDATE HANDLER-----------//////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -238,13 +187,13 @@ const updateProfileIntentHandler= {
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'UpdateProfileIntent';
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
     const { slots } = handlerInput.requestEnvelope.request.intent;
     var attribute= slots.attribute.value
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
 
-   attribute=(attribute==='fitness goal')?('fitnessGoal'):attribute
+   attribute=(attribute==='fitness goal' || attribute==='goal')?('fitnessGoal'):attribute
    attribute=(attribute==='fitness level')?('fitnessLevel'):attribute
 
    var fil= Object.fromEntries(Object.entries(slots).filter(([key, value]) => value.hasOwnProperty('value') && (key!=='attribute')));
@@ -252,12 +201,26 @@ const updateProfileIntentHandler= {
  
   existingUser[attribute]=change
 
-  if(attribute==="height" || attribute==="weight"){
+  if(attribute==="height" || attribute==="weight" ){
     existingUser['bmi']=skillUtils.calculateBMI(existingUser.height,existingUser.weight)
+
+  }
+  if(attribute==="fitnessGoal" || attribute==="fitnessLevel"){
+    var workoutsAvailable= await dbHelper.getWorkout()
+    dbHelper.regUser(existingUser);
+    WorkoutPlan=workoutG(workoutsAvailable,existingUser.fitnessGoal,existingUser.fitnessLevel)
+    dbHelper.regWorkout(userInfo.userId,userInfo.personId, WorkoutPlan)
+    await emailer(1,handlerInput,WorkoutPlan);
+    var speechText=`Alright. Your ${attribute} has been updated to ${change}, Since your ${attribute} has changed, new workoutplan has been mailed to you`
+  
+    return handlerInput.responseBuilder
+    .speak(speechText)
+    .getResponse();
+
   }
 
-  dbHelper.regUser(existingUser);
-  sessionAttributes.previouslySaid=speechText
+  dbHelper.regUser(existingUser);//repeatIntent data
+  sessionAttributes.previouslySaid=speechText//repeatIntent data
 
    return handlerInput.responseBuilder
       .speak(`Alright. Your ${attribute} has been updated to ${change} `)
@@ -273,15 +236,21 @@ const UserGeneralInfoIntentHandler={
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'UserGenInfoIntent';
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
     const request=handlerInput.requestEnvelope.request
+    const { slots } = request.intent;
     const {requestEnvelope,responseBuilder}=handlerInput
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    const persistentAttributes = await handlerInput.attributesManager.getPersistentAttributes()
     var name,age,gender
 
     const currentIntent = request.intent;
+    persistentAttributes.interupptedIntent=currentIntent
+
+    handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
+    await handlerInput.attributesManager.savePersistentAttributes();
+    
     if (request.dialogState && request.dialogState !== 'COMPLETED') {
-      console.log("something")
       return handlerInput.responseBuilder
         .addDelegateDirective(currentIntent)
         .getResponse();
@@ -299,8 +268,9 @@ const UserGeneralInfoIntentHandler={
       userInfo.gender=gender
       userInfo.height=height
       userInfo.weight=weight
+      if(height && weight){
       bmi = skillUtils.calculateBMI(userInfo.height, userInfo.weight);
-      userInfo.bmi=bmi
+      userInfo.bmi=bmi}
 
 
       let speechText = `Noted! your weight is ${weight} kilograms and your bmi is ${bmi}.`
@@ -332,7 +302,7 @@ const StrengthOrCardioIntentHandler={
   handle(handlerInput) {
     const type=  handlerInput.requestEnvelope.request.intent.slots.type.value;
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-    console.log(type)
+
     if(type==='strength'){
       console.log(type)
       return handlerInput.responseBuilder
@@ -372,13 +342,22 @@ const StrengthWorkoutIntentHandler={
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'StrengthWorkoutIntent'
 
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
     sessionAttributes.previousIntent=Alexa.getIntentName(handlerInput.requestEnvelope)
     const request=handlerInput.requestEnvelope.request
 
     var type= request.intent.slots.type.value
     var workoutname=request.intent.slots.workoutname.value
+
+    if(workoutname)
+    {
+      var workoutnames=await dbHelper.getWorkoutNames()
+      workoutname=skillUtils.findSimilarString(workoutname,workoutnames)
+      request.intent.slots.workoutname.value=workoutname
+    }
+    
+
     var sets=request.intent.slots.sets.value
     var reps=request.intent.slots.reps.value
     var time=request.intent.slots.time.value
@@ -402,8 +381,6 @@ const StrengthWorkoutIntentHandler={
       .getResponse();
     }
 
-    
-
     var i=sessionAttributes.currentWorkout
     var workoutdict={'workoutname':workoutname}
 
@@ -420,6 +397,7 @@ const StrengthWorkoutIntentHandler={
 
     return handlerInput.responseBuilder
       .speak(speechText)
+      .reprompt(speechText)
       .getResponse();
 
     }
@@ -435,6 +413,7 @@ const StrengthWorkoutIntentHandler={
 
       return handlerInput.responseBuilder
         .speak(speechText)
+        .reprompt(speechText)
         .getResponse();
     }
       
@@ -456,11 +435,16 @@ const GoalIntentHandler = {
   async handle(handlerInput) {
     var fitnessGoalSlot = handlerInput.requestEnvelope.request.intent.slots.goal.value;
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-  
-   
-   
+    const persistentAttributes = await handlerInput.attributesManager.getPersistentAttributes()
+
+
     userInfo.fitnessGoal=fitnessGoalSlot;
-    const speechText = `Cool! How would rate your current fitness level as, Beginner or Intermediate or Expert?`;
+
+    persistentAttributes.interupptedIntent=handlerInput.requestEnvelope.request.intent
+    handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
+    await handlerInput.attributesManager.savePersistentAttributes();
+
+    const speechText = `Cool! How would you rate your current fitness level as, Beginner or Intermediate or Expert?`;
     sessionAttributes.previouslySaid=speechText
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
    
@@ -486,21 +470,27 @@ const FitnessLevelIntent ={
   },
   async handle(handlerInput) {
     var fitnessLevel = handlerInput.requestEnvelope.request.intent.slots.fitnessLevel.value;
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    const persistentAttributes = await handlerInput.attributesManager.getPersistentAttributes()
     
+
     userInfo.fitnessLevel=fitnessLevel
 
-    const mostSimilarUser = await findMostSimilarUser(userInfo);
+    persistentAttributes.interupptedIntent=handlerInput.requestEnvelope.request.intent
+    handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
+    await handlerInput.attributesManager.savePersistentAttributes();
 
-    if(mostSimilarUser){
-    console.log("Most similar workout:", mostSimilarUser);
+    const mostSimilarUser = await findMostSimilarUser(userInfo);//Cosine Similarity finder for similar user
+
+    if(mostSimilarUser)
+    {
+    console.log("Most similar user:", mostSimilarUser);
     let scheduleData= await dbHelper.getWorkoutSchedule(mostSimilarUser['userId'],mostSimilarUser['personId'])
-    console.log(scheduleData)
     let workoutPlan=scheduleData.workout;
-    
-    dbHelper.regUser(userInfo);
+  
     dbHelper.regWorkout(userInfo.userId,userInfo.personId, workoutPlan)
     await emailer(1,handlerInput,workoutPlan);
+    dbHelper.regUser(userInfo);
+    handlerInput.attributesManager.deletePersistentAttributes( persistentAttributes)
 
     return handlerInput.responseBuilder
         .speak(`Based on your Fitness level and Fitness Goal, a personalized workout plan has been mailed to you. `)
@@ -510,11 +500,12 @@ const FitnessLevelIntent ={
     else{
     return dbHelper.getWorkout()
     .then(async (data)=>{
-        dbHelper.regUser(userInfo);
+       
         WorkoutPlan=workoutG(data,userInfo.fitnessGoal,userInfo.fitnessLevel)
-        console.log(WorkoutPlan);
         dbHelper.regWorkout(userInfo.userId,userInfo.personId, WorkoutPlan)
         await emailer(1,handlerInput,WorkoutPlan);
+        dbHelper.regUser(userInfo);
+        handlerInput.attributesManager.deletePersistentAttributes( persistentAttributes)
 
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         sessionAttributes.optionforEmail=1
@@ -522,7 +513,7 @@ const FitnessLevelIntent ={
        
 
         var speechText = `Based on your Fitness level and Fitness Goal, a personalized workout plan has been mailed to you. `;
-        if(day!=='Sunday' || day !=='Saturday'){
+        if(day!=="Sunday" && day !=="Saturday"){
           speechText+=` Today's ${day}, if you wanna start today's workout now, try saying "start the workout"`
         }
         sessionAttributes.previouslySaid=speechText
@@ -548,7 +539,7 @@ async handle(handlerInput) {
     let workoutPlan=scheduleData.workout;
   emailer(1,handlerInput,workoutPlan);
     var speechText = `Your personalized workout plan has been mailed to you. </speak>`;
-    if(day!=='Sunday' || day !=='Saturday'){
+    if(day!=='Sunday' && day !=='Saturday'){
       speechText+=` Today's ${day}, if you wanna start today's workout now, try saying "start the workout"`
     }
   }
@@ -585,12 +576,11 @@ const WorkoutIntentHandler={
     let day = weekday[d.getDay()];
 
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-    try{
     const persistentAttributes = await handlerInput.attributesManager.getPersistentAttributes()
     var control = handlerInput.requestEnvelope.request.intent.slots.control.value;
     
     let workoutPlan=''
-    let scheduleData= await dbHelper.getWorkoutSchedule(existingUser.userId,existingUser.personId)
+    let scheduleData= await dbHelper.getWorkoutSchedule(userInfo.userId,userInfo.personId)
     workoutPlan=scheduleData.workout;
 
     var workout=workoutPlan[day]
@@ -604,7 +594,6 @@ const WorkoutIntentHandler={
 
     }
 
-   
     if(control==="start"){
       if(workout[0]['muscle']==="cardio"){
          var speechText=`start the workout with ${workout[0]['workout']} for ${workout[0]['time']} mins, `
@@ -617,32 +606,42 @@ const WorkoutIntentHandler={
         handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
         await handlerInput.attributesManager.savePersistentAttributes();
     }
-    else if((control==="next" || control==="continue") && persistentAttributes.workoutno<workoutCount){
-      var i= persistentAttributes.workoutno;
-      if(workout[i]['muscle']==="cardio")
-      {
-        var speechText=`next workout is ${workout[i]['workout']} for ${workout[i]['time']} mins, `
-        speechText+=` say "next workout" after you complete this workout. if you want to know instructions for this workout, try saying "instruct me"`
-      }
-      else
-      {
-        var speechText=`next workout is ${workout[i]['workout']} doing ${workout[i]['sets']} sets of ${workout[i]['reps']} reps, `
-        speechText+=` say "next workout" after you complete this workout. if you want to know instructions for this workout, try saying "instruct me"`   
-      }
-      persistentAttributes.workoutno=i+1
-      handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
-      await handlerInput.attributesManager.savePersistentAttributes();
+    else if((control==="next" || control==="continue") ){
+      if(persistentAttributes.workoutno && persistentAttributes.workoutno<workoutCount){
+          var i= persistentAttributes.workoutno;
+          if(workout[i]['muscle']==="cardio")
+          {
+            var speechText=`next workout is ${workout[i]['workout']} for ${workout[i]['time']} mins, `
+            speechText+=` say "next workout" after you complete this workout. if you want to know instructions for this workout, try saying "instruct me"`
+          }
+          else
+          {
+            var speechText=`next workout is ${workout[i]['workout']} doing ${workout[i]['sets']} sets of ${workout[i]['reps']} reps, `
+            speechText+=` say "next workout" after you complete this workout. if you want to know instructions for this workout, try saying "instruct me"`   
+          }
+          persistentAttributes.workoutno=i+1
+          handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
+          await handlerInput.attributesManager.savePersistentAttributes();
+        }
+          else{
+            var speechText =`You don't have any workout session currently in progress, say 'start the workout' to start a new workout session`
+          }
     }
+
     else if(control==="instruct"){
-      var i= persistentAttributes.workoutno;
-      var speechText =`<speak> ${workout[i]['instructions']}</speak>`
-      speechText+=` say "next workout" after you complete this workout`
+      if(persistentAttributes.workoutno){
+        var i= persistentAttributes.workoutno;
+        var speechText =`<speak> ${workout[i]['instructions']}`
+        speechText+=` say 'next workout' after you complete this workout</speak>`
+      }
+      else{
+        var speechText =`You don't have any workout session currently in progress, say 'start the workout' to start a new workout session`
+      }
 
     }
     else{
       var speechText="End of today's workout session"
-      handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
-      await handlerInput.attributesManager.savePersistentAttributes();
+      await handlerInput.attributesManager.deletePersistentAttributes( persistentAttributes);
    }
 
    sessionAttributes.previouslySaid=speechText
@@ -653,10 +652,7 @@ const WorkoutIntentHandler={
     .reprompt(speechText)
     .getResponse(); 
 
-  }
-  catch(err){
-    console.log(err)
-  }
+  
 }
 
 }
@@ -687,8 +683,9 @@ const CancelAndStopIntentHandler = {
     handle(handlerInput) {
       const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-        if(sessionAttributes.previousIntent==='StrengthWorkoutIntent'){
-          dbHelper.newstoreWorkoutinDB(userInfo.userId,userInfo.personId, recordedWorkouts)
+        if(sessionAttributes.previousIntent==='StrengthWorkoutIntent' && recordedWorkouts.length>0){
+          dbHelper.storeWorkoutinDB(userInfo.userId,userInfo.personId, recordedWorkouts)
+          recordedWorkouts=[]
           var speakOutput='workouts has been recorded'
         }
        else
@@ -807,12 +804,13 @@ exports.handler = Alexa.SkillBuilders.custom()
     }))
     .addRequestHandlers(
         LaunchRequestHandler,
-        LaunchOptionIntentHandler,
         callupdateProfileIntentHandler,
         GetWorkoutScheduleIntentHandler,
         GetProgressIntentHandler,
+        WorkoutDemoIntentHandler,
         RefreshWorkoutIntentHandler,
         updateProfileIntentHandler,
+        DeleteProfileIntentHandler,
         UserGeneralInfoIntentHandler,
         StrengthOrCardioIntentHandler,
         StrengthWorkoutIntentHandler,

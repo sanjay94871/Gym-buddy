@@ -1,4 +1,15 @@
+function randomizeWorkouts(workoutArray) {
+  for (let i = workoutArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [workoutArray[i], workoutArray[j]] = [workoutArray[j], workoutArray[i]]; // Swap elements
+  }
+  return workoutArray;
+}
+
 var workoutG = function (data,fitnessGoal,fitnessLevel) {
+
+    data=randomizeWorkouts(data)
+    console.log(data)
     var daysofWeek = [
         { day: 'Monday', muscle: 'chest' },
         { day: 'Tuesday', muscle: 'lats' },
@@ -55,5 +66,8 @@ var workoutG = function (data,fitnessGoal,fitnessLevel) {
     return workoutPlan;
   }
   
+
+
+
   module.exports = workoutG;
   

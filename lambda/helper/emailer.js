@@ -9,7 +9,7 @@ const {scheduleTable, recordTable}=require("./workoutSchedule");
 var profileEmail=''
 
 const messages = {
-  NOTIFY_MISSING_PERMISSIONS: 'Please enable profile permissions in the Amazon Alexa app and try saying "send email"',
+  NOTIFY_MISSING_PERMISSIONS: 'Please enable profile permissions in the Amazon Alexa app and try again',
   ERROR: 'Uh Oh. Looks like something went wrong.'
 };
 const EMAIL_PERMISSION = "alexa::profile:email:read";
