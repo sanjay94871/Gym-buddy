@@ -18,7 +18,9 @@
                 },
                 {
                     "name": "AMAZON.StopIntent",
-                    "samples": []
+                    "samples": [
+                        "Thank you"
+                    ]
                 },
                 {
                     "name": "AMAZON.NavigateHomeIntent",
@@ -53,68 +55,6 @@
                         "my fitness goal is to {goal}",
                         "{goal}",
                         "my goal is to {goal}"
-                    ]
-                },
-                {
-                    "name": "WorkoutDetailsIntent",
-                    "slots": [
-                        {
-                            "name": "sets",
-                            "type": "AMAZON.NUMBER",
-                            "samples": [
-                                "{sets} sets",
-                                "{sets}"
-                            ]
-                        },
-                        {
-                            "name": "workoutname",
-                            "type": "Workouts",
-                            "samples": [
-                                "the workout name is {workoutname}",
-                                "the workout is {workoutname}",
-                                "{workoutname}"
-                            ]
-                        },
-                        {
-                            "name": "reps",
-                            "type": "AMAZON.NUMBER",
-                            "samples": [
-                                "{reps}",
-                                "{reps} reps each set"
-                            ]
-                        }
-                    ],
-                    "samples": [
-                        "i did {sets} sets",
-                        "i performed {sets} sets",
-                        " I performed {sets} sets of {workoutname}  aiming for {reps} reps in each set",
-                        "I accomplished {sets} sets of {workoutname} doing {reps} reps in each set",
-                        "For my workout I did {sets} sets of {workoutname} with {reps} reps per set",
-                        "I completed {sets} sets of {workoutname} with {reps} reps in each set",
-                        "I did {sets} sets of {workoutname} with {reps} reps each"
-                    ]
-                },
-                {
-                    "name": "LaunchOptionIntent",
-                    "slots": [
-                        {
-                            "name": "option",
-                            "type": "options",
-                            "samples": [
-                                "{option}"
-                            ]
-                        }
-                    ],
-                    "samples": [
-                        "My decision is to try option {option}",
-                        "I think I'll try out option {option}",
-                        "Let's give option {option} a shot",
-                        "let's go with option {option}",
-                        "i will try option {option}",
-                        "i will try {option}",
-                        "choose the {option}",
-                        "choose {option}",
-                        "option {option}"
                     ]
                 },
                 {
@@ -221,19 +161,13 @@
                     ]
                 },
                 {
-                    "name": "UpdateWorkoutDbIntent",
-                    "slots": [],
-                    "samples": [
-                        "update workout database"
-                    ]
-                },
-                {
                     "name": "UserGenInfoIntent",
                     "slots": [
                         {
                             "name": "name",
                             "type": "AMAZON.FirstName",
                             "samples": [
+                                "{name}",
                                 "my name is {name}",
                                 "call me {name} "
                             ]
@@ -256,6 +190,7 @@
                             "name": "height",
                             "type": "AMAZON.NUMBER",
                             "samples": [
+                                "{height} centimetre",
                                 "{height}",
                                 "{height} centimetres"
                             ]
@@ -270,6 +205,9 @@
                         }
                     ],
                     "samples": [
+                        "{height} centimetre",
+                        "{weight} kilogram",
+                        "{name}",
                         "create profile",
                         "i'm {height} centrimetres tall",
                         "i am {height} centrimetres tall",
@@ -305,6 +243,8 @@
                             "name": "workoutname",
                             "type": "Workouts",
                             "samples": [
+                                "i did some {workoutname}",
+                                "i did {workoutname}",
                                 "{workoutname}"
                             ]
                         },
@@ -320,6 +260,7 @@
                             "name": "reps",
                             "type": "AMAZON.NUMBER",
                             "samples": [
+                                "{reps} reps for each set",
                                 "{reps}",
                                 "{reps} reps"
                             ]
@@ -359,6 +300,11 @@
                     "name": "CallUpdateProfileIntent",
                     "slots": [],
                     "samples": [
+                        "i would like to change my profile",
+                        "i want to change my profile",
+                        "id like to change my profile",
+                        "I would like to make some changes to my profile",
+                        "update my profile",
                         "i want to change my details",
                         "i would like to update my profile",
                         "I want to update my profile"
@@ -368,6 +314,10 @@
                     "name": "GetWorkoutScheduleIntent",
                     "slots": [],
                     "samples": [
+                        "send my exercise plan",
+                        "Send me the personalized workout schedule",
+                        "I need my workout schedule",
+                        "Could you provide me with my workout schedule",
                         "send my workout plan",
                         "resend my workout schedule",
                         "send my workout schedule"
@@ -377,6 +327,16 @@
                     "name": "GetProgressIntent",
                     "slots": [],
                     "samples": [
+                        "can you give me my progress",
+                        "please update me on my progress",
+                        "can you show me my progress",
+                        "tell my progress",
+                        "show my progress",
+                        "give me my progress",
+                        "I'm curious about my fitness journey. Show me my workout updates",
+                        "Show me my workout history",
+                        "I would like to see how I've been progressing with my workouts",
+                        "Please provide an update on my workout progress",
                         "send my  progress",
                         "mail my workout progress",
                         "send my workout progress"
@@ -386,8 +346,34 @@
                     "name": "RefreshWorkoutIntent",
                     "slots": [],
                     "samples": [
+                        "Looking for something new for my workout",
+                        "Give me a new workout routine to try",
                         "send new workout",
                         "refresh my workout"
+                    ]
+                },
+                {
+                    "name": "DeleteProfileIntent",
+                    "slots": [],
+                    "samples": [
+                        "erase my details",
+                        "delete my profile"
+                    ]
+                },
+                {
+                    "name": "WorkoutDemoIntent",
+                    "slots": [
+                        {
+                            "name": "workoutdemo",
+                            "type": "Workouts"
+                        }
+                    ],
+                    "samples": [
+                        "tell me how to do {workoutdemo}",
+                        "how can I perform {workoutdemo}",
+                        "tell me about {workoutdemo}",
+                        "how to perform {workoutdemo}",
+                        "how to do {workoutdemo}"
                     ]
                 }
             ],
@@ -628,6 +614,146 @@
                     "values": [
                         {
                             "name": {
+                                "value": "Chest dip"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Decline EZ-bar skullcrusher"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Dumbbell floor press"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "EZ-Bar Curl"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "EZ-bar spider curl"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Fast Kick With Arm Circles"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Flexor Incline Dumbbell Curls"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Full Range-Of-Motion Lat Pulldown"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Gironda Sternum Chins"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Hang Clean"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Machine-assisted pull-up"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Muscle Up"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Power snatch"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Reverse Grip Triceps Pushdown"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Rocky Pull-Ups/Pulldowns"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Seated Bent-Over One-Arm Dumbbell Triceps Extension"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Shotgun row"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Single-arm cable triceps extension"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Single-arm kneeling lat pull-down"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Single-Leg Press"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "V-bar pull-up"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Vertical Mountain Climber"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Weighted pull-up"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Wide-grip barbell curl"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Wide-grip bench press"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Wide-Grip Decline Barbell Bench Press"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Wide-Grip Rear Pull-Up"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "zottman curl"
+                            }
+                        },
+                        {
+                            "name": {
                                 "value": "Bicep curls",
                                 "synonyms": [
                                     "curls"
@@ -837,7 +963,11 @@
                         },
                         {
                             "name": {
-                                "value": "Pushups"
+                                "value": "Pushups",
+                                "synonyms": [
+                                    "pushups",
+                                    "push ups"
+                                ]
                             }
                         },
                         {
@@ -923,57 +1053,6 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.769745174358.701249761008"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "WorkoutDetailsIntent",
-                    "confirmationRequired": false,
-                    "prompts": {},
-                    "slots": [
-                        {
-                            "name": "sets",
-                            "type": "AMAZON.NUMBER",
-                            "confirmationRequired": false,
-                            "elicitationRequired": true,
-                            "prompts": {
-                                "elicitation": "Elicit.Slot.259419435570.1159456855398"
-                            }
-                        },
-                        {
-                            "name": "workoutname",
-                            "type": "Workouts",
-                            "confirmationRequired": false,
-                            "elicitationRequired": true,
-                            "prompts": {
-                                "elicitation": "Elicit.Slot.259419435570.1253805649302"
-                            }
-                        },
-                        {
-                            "name": "reps",
-                            "type": "AMAZON.NUMBER",
-                            "confirmationRequired": false,
-                            "elicitationRequired": true,
-                            "prompts": {
-                                "elicitation": "Elicit.Slot.259419435570.79544555209"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "LaunchOptionIntent",
-                    "delegationStrategy": "SKILL_RESPONSE",
-                    "confirmationRequired": false,
-                    "prompts": {},
-                    "slots": [
-                        {
-                            "name": "option",
-                            "type": "options",
-                            "confirmationRequired": false,
-                            "elicitationRequired": true,
-                            "prompts": {
-                                "elicitation": "Elicit.Slot.489364393142.305588848195"
                             }
                         }
                     ]

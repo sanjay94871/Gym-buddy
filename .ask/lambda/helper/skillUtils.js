@@ -319,31 +319,5 @@ var workoutdata=
 
 
 
-function generateWorkoutPlan(bmi, fitnessGoal) {
-  let workoutPlan = '';
-
-  // Generate workout plan based on BMI and fitness goal
-  if (fitnessGoal === 'weight loss') {
-    if (bmi < 18.5) {
-      workoutPlan = 'Your workout plan should focus on building muscle mass and increasing calorie intake.';
-    } else if (bmi >= 18.5 && bmi < 25) {
-      workoutPlan = 'Your workout plan should include a combination of cardio exercises and strength training to burn fat and maintain muscle mass.';
-    } else {
-      workoutPlan = 'Your workout plan should primarily focus on cardio exercises to burn excess fat.';
-    }
-  } else if (fitnessGoal === 'muscle gain') {
-    if (bmi < 18.5) {
-      workoutPlan = 'Your workout plan should focus on building muscle mass and increasing calorie intake.';
-    } else if (bmi >= 18.5 && bmi < 25) {
-      workoutPlan = 'Your workout plan should include a combination of strength training exercises targeting different muscle groups.';
-    } else {
-      workoutPlan = 'Your workout plan should include a combination of strength training exercises and a high-calorie diet to support muscle growth.';
-    }
-  } else {
-    workoutPlan = 'Your fitness goal is not recognized. Please specify a valid fitness goal.';
-  }
-
-  return workoutPlan;
-}
 
   module.exports={calculateBMI,getExercise,updateProfPrompt,workoutdata,findSimilarString}

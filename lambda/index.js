@@ -343,12 +343,16 @@ const StrengthWorkoutIntentHandler={
 
   },
   async handle(handlerInput) {
+    var workoutname
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
     sessionAttributes.previousIntent=Alexa.getIntentName(handlerInput.requestEnvelope)
     const request=handlerInput.requestEnvelope.request
 
     var type= request.intent.slots.type.value
-    var workoutname=request.intent.slots.workoutname.value
+    if(request.intent.slots.workoutname.resolutions)
+        workoutname=request.intent.slots.workoutname.resolutions.resolutionsPerAuthority[0].values[0].value.name
+    else
+        workoutname=request.intent.slots.workoutname.value
 
     if(workoutname)
     {
@@ -623,8 +627,12 @@ const WorkoutIntentHandler={
           handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
           await handlerInput.attributesManager.savePersistentAttributes();
         }
-          else{
+          else if(perspersistentAttributes.workoutno){
             var speechText =`You don't have any workout session currently in progress, say 'start the workout' to start a new workout session`
+          }
+          else{
+            var speechText="End of today's workout session"
+            await handlerInput.attributesManager.deletePersistentAttributes( persistentAttributes);
           }
     }
 
@@ -639,11 +647,6 @@ const WorkoutIntentHandler={
       }
 
     }
-    else{
-      var speechText="End of today's workout session"
-      await handlerInput.attributesManager.deletePersistentAttributes( persistentAttributes);
-   }
-
    sessionAttributes.previouslySaid=speechText
    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
@@ -799,7 +802,7 @@ const ErrorHandler = {
  * */
 exports.handler = Alexa.SkillBuilders.custom()
     .withPersistenceAdapter(new DynamoDBAdapter.DynamoDbPersistenceAdapter({
-      tableName: 'InProgressWorkout',
+      tableName: 'InProgress',
       createTable: true,
     }))
     .addRequestHandlers(
