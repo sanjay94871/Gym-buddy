@@ -5,6 +5,7 @@ const aws = require("@aws-sdk/client-ses");
 let { defaultProvider } = require("@aws-sdk/credential-provider-node");
 
 const {scheduleTable, recordTable}=require("./workoutSchedule");
+const { error } = require('console');
 
 var profileEmail=''
 
@@ -42,6 +43,8 @@ var getEmail= async function (handlerInput){
 }
   
 var emailer= async function (optionforEmail,handlerInput,workoutData){
+
+return new Promise(async (resolve, reject) => { 
 // Function to convert workout data into an HTML table
 await getEmail(handlerInput);
 var emailText='',filename='',subject='',speechText=''
@@ -86,6 +89,7 @@ const ses = new aws.SES({
   });
 
 
+
   // send some mail
  transporter.sendMail(
     {
@@ -99,8 +103,7 @@ const ses = new aws.SES({
           path: `/tmp/${filename}` 
         }
       ],
-    },
-    (err, info) => {
+    },(err, info) => {
       if(err){
       console.log(err)
       return handlerInput.responseBuilder
@@ -110,13 +113,11 @@ const ses = new aws.SES({
     }
     else{
       console.log("mail sent")
-      // return handlerInput.responseBuilder
-      // .speak(speechText)
-      // .getResponse()
+      resolve()
     }
-  }
-  );
 
+  })
+});
 }
 
 module.exports= emailer;

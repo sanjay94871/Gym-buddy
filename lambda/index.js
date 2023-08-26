@@ -15,6 +15,13 @@ const DynamoDBAdapter = require('ask-sdk-dynamodb-persistence-adapter');
 var bmi,existingUser;
 var userInfo={}
 
+const messages = {
+  NOTIFY_MISSING_PERMISSIONS: 'Please enable profile permissions in the Amazon Alexa app and try again',
+  ERROR: 'Uh Oh. Looks like something went wrong.'
+};
+const EMAIL_PERMISSION = "alexa::profile:email:read";
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Handler for the LaunchRequest
 const LaunchRequestHandler = {
@@ -48,6 +55,7 @@ const LaunchRequestHandler = {
           var forwardTo=persistentAttributes.interupptedIntent
           return handlerInput.responseBuilder
           .speak(`<amazon:emotion name="disappointed" intensity="high">Sorry for the interruption caused, we'll continue from where we left. </amazon:emotion>`)
+          .reprompt(`<amazon:emotion name="disappointed" intensity="high">Sorry for the interruption caused, we'll continue from where we left. </amazon:emotion>`)
           .addDelegateDirective(forwardTo)
           .getResponse();    
         }
@@ -127,7 +135,7 @@ const GetWorkoutScheduleIntentHandler= {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
     let scheduleData= await dbHelper.getWorkoutSchedule(existingUser.userId,existingUser.personId)
     let workoutPlan=scheduleData.workout;
-    await emailer(1,handlerInput,workoutPlan)
+    emailer(1,handlerInput,workoutPlan)
     var speechText = `your personalized workout plan has been mailed to you`;
     sessionAttributes.previouslySaid=speechText;//repeatIntent data
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);//repeatIntent data
@@ -276,7 +284,7 @@ const UserGeneralInfoIntentHandler={
       let speechText = `Noted! your weight is ${weight} kilograms and your bmi is ${bmi}.`
       sessionAttributes.previouslySaid=speechText
 
-      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
         return responseBuilder
             .speak(speechText)
@@ -291,48 +299,6 @@ const UserGeneralInfoIntentHandler={
 }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-///////////////////////////////////------GETS STRENGTH OR CARDIO TYPE AND PASS ON-----------///////////////////////////////////////////////////////////
-const StrengthOrCardioIntentHandler={
-  canHandle(handlerInput) {
-    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'StrengthOrCardioIntent';
-  },
-  handle(handlerInput) {
-    const type=  handlerInput.requestEnvelope.request.intent.slots.type.value;
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-
-    if(type==='strength'){
-      console.log(type)
-      return handlerInput.responseBuilder
-        .addDelegateDirective(
-          {
-            name: 'StrengthWorkoutIntent',
-            confirmationStatus: 'NONE',
-            slots: {}
-         })
-         .getResponse()
-    }
-    else if(type==='cardio'){
-      console.log(type)
-      return handlerInput.responseBuilder
-        .addDelegateDirective(
-          {
-            name: 'CardioWorkoutIntent',
-            confirmationStatus: 'NONE',
-            slots: {}
-         })
-         .getResponse()
-    }
-    else{
-      return handlerInput.responseBuilder
-      .speak("currently not supported")
-      .reprompt("currently not supported")
-    }
-  }
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////------RECORDS STRENGTH WORKOUT-----------//////////////////////////////////////////////////////////////////////////////////////////////
 var recordedWorkouts=[]
@@ -492,9 +458,11 @@ const FitnessLevelIntent ={
     let workoutPlan=scheduleData.workout;
   
     dbHelper.regWorkout(userInfo.userId,userInfo.personId, workoutPlan)
-    await emailer(1,handlerInput,workoutPlan);
-    dbHelper.regUser(userInfo);
-    handlerInput.attributesManager.deletePersistentAttributes( persistentAttributes)
+     emailer(1,handlerInput,workoutPlan).then(()=>
+   {
+      dbHelper.regUser(userInfo);
+      handlerInput.attributesManager.deletePersistentAttributes(persistentAttributes)
+   });
 
     return handlerInput.responseBuilder
         .speak(`Based on your Fitness level and Fitness Goal, a personalized workout plan has been mailed to you. `)
@@ -507,9 +475,10 @@ const FitnessLevelIntent ={
        
         WorkoutPlan=workoutG(data,userInfo.fitnessGoal,userInfo.fitnessLevel)
         dbHelper.regWorkout(userInfo.userId,userInfo.personId, WorkoutPlan)
-        await emailer(1,handlerInput,WorkoutPlan);
-        dbHelper.regUser(userInfo);
-        handlerInput.attributesManager.deletePersistentAttributes( persistentAttributes)
+        emailer(1,handlerInput,WorkoutPlan).then(()=>{
+          dbHelper.regUser(userInfo);
+          handlerInput.attributesManager.deletePersistentAttributes( persistentAttributes)
+        })
 
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         sessionAttributes.optionforEmail=1
@@ -611,29 +580,32 @@ const WorkoutIntentHandler={
         await handlerInput.attributesManager.savePersistentAttributes();
     }
     else if((control==="next" || control==="continue") ){
-      if(persistentAttributes.workoutno && persistentAttributes.workoutno<workoutCount){
+      if(persistentAttributes.workoutno){
           var i= persistentAttributes.workoutno;
           if(workout[i]['muscle']==="cardio")
           {
             var speechText=`next workout is ${workout[i]['workout']} for ${workout[i]['time']} mins, `
-            speechText+=` say "next workout" after you complete this workout. if you want to know instructions for this workout, try saying "instruct me"`
+            persistentAttributes.workoutno=i+1
           }
           else
           {
             var speechText=`next workout is ${workout[i]['workout']} doing ${workout[i]['sets']} sets of ${workout[i]['reps']} reps, `
-            speechText+=` say "next workout" after you complete this workout. if you want to know instructions for this workout, try saying "instruct me"`   
+            persistentAttributes.workoutno=i+1
           }
-          persistentAttributes.workoutno=i+1
-          handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
-          await handlerInput.attributesManager.savePersistentAttributes();
-        }
-          else if(perspersistentAttributes.workoutno){
-            var speechText =`You don't have any workout session currently in progress, say 'start the workout' to start a new workout session`
+          if(persistentAttributes.workoutno<workoutCount){
+            speechText+=` say "next workout" after you complete this workout. if you want to know instructions for this workout, try saying "instruct me"`     
+            handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
+            await handlerInput.attributesManager.savePersistentAttributes();
           }
           else{
             var speechText="End of today's workout session"
             await handlerInput.attributesManager.deletePersistentAttributes( persistentAttributes);
           }
+
+        }
+        else if(!persistentAttributes.workoutno){
+          var speechText="You don't have a workout session in progress, try saying 'start the workout'"
+        }
     }
 
     else if(control==="instruct"){
@@ -815,7 +787,6 @@ exports.handler = Alexa.SkillBuilders.custom()
         updateProfileIntentHandler,
         DeleteProfileIntentHandler,
         UserGeneralInfoIntentHandler,
-        StrengthOrCardioIntentHandler,
         StrengthWorkoutIntentHandler,
         WorkoutIntentHandler,
         GoalIntentHandler,

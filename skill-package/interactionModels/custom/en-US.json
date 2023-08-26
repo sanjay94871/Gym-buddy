@@ -190,15 +190,18 @@
                             "name": "height",
                             "type": "AMAZON.NUMBER",
                             "samples": [
+                                "my height is {height} centimeters",
+                                "I'm {height} centimeters tall",
                                 "{height} centimetre",
                                 "{height}",
-                                "{height} centimetres"
+                                "{height} centimeters"
                             ]
                         },
                         {
                             "name": "weight",
                             "type": "AMAZON.NUMBER",
                             "samples": [
+                                "my weight is {weight} kilograms",
                                 "{weight} kilograms",
                                 "{weight}"
                             ]
