@@ -9,8 +9,8 @@
             "default": {
               "lambda": {
                 "arn": "arn:aws:lambda:us-east-1:068726337588:function:ask-gymbuddy-default-default-1693075095728",
-                "lastModified": "2023-08-26T20:55:20.000+0000",
-                "revisionId": "69ca11be-005d-4057-b81b-701dc2bbe4a5"
+                "lastModified": "2023-08-28T14:43:17.000+0000",
+                "revisionId": "9ae56536-e803-4d72-af74-11a9500bd65d"
               },
               "iamRole": "arn:aws:iam::068726337588:role/ask-lambda-gymbuddy-1693075093430"
             }
@@ -18,12 +18,12 @@
         }
       },
       "skillMetadata": {
-        "lastDeployHash": "7WRtQkgKttZ3IkRigCKqzEf1Dgg=",
+        "lastDeployHash": "oc7iW7Q7mNK5fHMly0D8uTZRd38=",
         "lastDeployType": "interaction-model"
       },
       "code": {
         "default": {
-          "lastDeployHash": "HTifRvWLmvQXreLQ5v4yusXC7YU="
+          "lastDeployHash": "dTyU78yit/mExy2caHJolgkw/Ek="
         }
       }
     }

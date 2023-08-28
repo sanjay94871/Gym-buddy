@@ -47,7 +47,7 @@ const LaunchRequestHandler = {
     }
     else
     {
-      var speechText = 'Welcome to the Gym Workout Planner. We will start by creating a profile for you. What is your name?';
+      var speechText = 'Welcome to the Gym Workout Planner. We will start by creating a profile for you.';
       userInfo.userId = userId
       userInfo.personId=personId
 
@@ -63,6 +63,11 @@ const LaunchRequestHandler = {
      return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
+      .addDelegateDirective({
+        name: 'UserGenInfoIntent',
+        confirmationStatus: 'NONE',
+        slots: {}
+     })
       .getResponse();
     }
   },
@@ -302,10 +307,10 @@ const UserGeneralInfoIntentHandler={
 
 ///////////////////////////////////------RECORDS STRENGTH WORKOUT-----------//////////////////////////////////////////////////////////////////////////////////////////////
 var recordedWorkouts=[]
-const StrengthWorkoutIntentHandler={
+const RecordWorkoutIntentHandler={
   canHandle(handlerInput) {
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'StrengthWorkoutIntent'
+      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'RecordWorkoutIntent'
 
   },
   async handle(handlerInput) {
@@ -658,7 +663,7 @@ const CancelAndStopIntentHandler = {
     handle(handlerInput) {
       const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-        if(sessionAttributes.previousIntent==='StrengthWorkoutIntent' && recordedWorkouts.length>0){
+        if(sessionAttributes.previousIntent==='RecordWorkoutIntent' && recordedWorkouts.length>0){
           dbHelper.storeWorkoutinDB(userInfo.userId,userInfo.personId, recordedWorkouts)
           recordedWorkouts=[]
           var speakOutput='workouts has been recorded'
@@ -787,7 +792,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         updateProfileIntentHandler,
         DeleteProfileIntentHandler,
         UserGeneralInfoIntentHandler,
-        StrengthWorkoutIntentHandler,
+        RecordWorkoutIntentHandler,
         WorkoutIntentHandler,
         GoalIntentHandler,
         FitnessLevelIntent,
